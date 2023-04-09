@@ -43,6 +43,8 @@
   
 
   
+    <link rel="shortcut icon" href="/images/redcell.ico">
+  
 
   
 
@@ -70,7 +72,7 @@
 
   
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div></a></div>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div><div class="sub normal cap">一个长期主义者</div><div class="sub hover cap" style="opacity:0"> 十年饮冰，冷暖自知</div></a></div>
 
 <nav class="menu dis-select"></nav>
 </header>
@@ -238,7 +240,7 @@
     stellar.search = {};
     stellar.search.service = 'local_search';
     if (stellar.search.service == 'local_search') {
-      let service_obj = Object.assign({}, {"field":"all","path":"/search.json","content":true,"sort":"-date"});
+      let service_obj = Object.assign({}, {"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"});
       stellar.search[stellar.search.service] = service_obj;
     }
   }

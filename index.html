@@ -43,6 +43,8 @@
   
 
   
+    <link rel="shortcut icon" href="/images/redcell.ico">
+  
 
   
 
@@ -70,7 +72,7 @@
 
   
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div></a></div>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div><div class="sub normal cap">一个长期主义者</div><div class="sub hover cap" style="opacity:0"> 十年饮冰，冷暖自知</div></a></div>
 
 <nav class="menu dis-select"></nav>
 </header>
@@ -90,7 +92,7 @@
       
   
 
-<header class="header mobile-only"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div></a></div></header>
+<header class="header mobile-only"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div><div class="sub normal cap">一个长期主义者</div><div class="sub hover cap" style="opacity:0"> 十年饮冰，冷暖自知</div></a></div></header>
 
 
 
@@ -102,7 +104,7 @@
 <div class="nav-wrap"><nav class="sub post cap"><a class="active" href="/">近期发布</a><a href="/archives">归档</a></nav></div>
 
   <div class="post-list post"><a class="post-card post " href="/2023/04/05/%E3%80%8A%E6%9C%BA%E5%99%A8%E4%BA%BA%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%92%8CMATLAB-Simulink%E4%BB%BF%E7%9C%9F%E3%80%8B%E7%AC%94%E8%AE%B01-%E4%B8%A4%E5%85%B3%E8%8A%82%E6%9C%BA%E6%A2%B0%E8%87%82PD%E6%8E%A7%E5%88%B6%EF%BC%88%E4%B8%8D%E8%80%83%E8%99%91%E9%87%8D%E5%8A%9B%EF%BC%89/">
-<article class="md-text"><h2 class="post-title">《机器人控制系统和MATLAB Simulink仿真》笔记1-两关节机械臂PD控制（不考虑重力）</h2><div class="excerpt"><p> 前言
+<article class="md-text"><div class="post-cover"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://source.unsplash.com/1280x640/?"/></div><h2 class="post-title">《机器人控制系统和MATLAB Simulink仿真》笔记1-两关节机械臂PD控制（不考虑重力）</h2><div class="excerpt"><p> 前言
 
 最近在看控制的东西，想动手实践一下，看到有书名曰《机器人控制系统和MATLAB simulink仿真》，于是学习一下做做记录，也丰富自己对控制和动力学的理解。
 
@@ -111,10 +113,10 @@
 
 这里的p1p_1p1​、p2p_2p2​、p3p_3p3​、q1q_1q1​、q2q_2q2​都是什么东西？写得不清不楚的，不过推导动力学用拉格朗日是传统...</p></div><div class="meta cap"><span class="cap" id="post-meta">发布于&nbsp;<time datetime="2023-04-05T14:19:24.000Z">2023-04-05</time></span></div></article>
 </a><a class="post-card post " href="/2023/04/02/%E5%85%B3%E4%BA%8E%E6%88%91%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BC%80%E9%80%9A%E5%8D%9A%E5%AE%A2/">
-<article class="md-text"><h2 class="post-title">关于我为什么开通博客</h2><div class="excerpt"><p>我第一次知道有博客这种东西应该是本科查资料的时候，经常就查到一些大佬自己建的网站，炫酷的页面，舒适的排版，当时就觉得建立博客是一件很酷的事。但那时候并没有想到要建立自己的网站。
+<article class="md-text"><div class="post-cover"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://source.unsplash.com/1280x640/?"/></div><h2 class="post-title">关于我为什么开通博客</h2><div class="excerpt"><p>我第一次知道有博客这种东西应该是本科查资料的时候，经常就查到一些大佬自己建的网站，炫酷的页面，舒适的排版，当时就觉得建立博客是一件很酷的事。但那时候并没有想到要建立自己的网站。
 其实我本科乃至以前都是不爱做笔记的，每次开学的时候我都信誓旦旦地买了好几本笔记本，下定决心要记上几本。然而有几点原因让我始终不能坚持下去：一来一开始写得工工整整，但后面逐渐潦草，消磨了我写笔记的耐心；二来整理笔记于我...</p></div><div class="meta cap"><span class="cap" id="post-meta">发布于&nbsp;<time datetime="2023-04-02T14:39:34.000Z">2023-04-02</time></span></div></article>
 </a><a class="post-card post " href="/2023/03/25/hello-world/">
-<article class="md-text"><h2 class="post-title">Hello World</h2><div class="excerpt"><p>Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
+<article class="md-text"><div class="post-cover"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://source.unsplash.com/1280x640/?"/></div><h2 class="post-title">Hello World</h2><div class="excerpt"><p>Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
  Q...</p></div><div class="meta cap"><span class="cap" id="post-meta">发布于&nbsp;<time datetime="2023-03-25T10:56:37.142Z">2023-03-25</time></span></div></article>
 </a></div>
   
@@ -252,7 +254,7 @@
     stellar.search = {};
     stellar.search.service = 'local_search';
     if (stellar.search.service == 'local_search') {
-      let service_obj = Object.assign({}, {"field":"all","path":"/search.json","content":true,"sort":"-date"});
+      let service_obj = Object.assign({}, {"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"});
       stellar.search[stellar.search.service] = service_obj;
     }
   }
