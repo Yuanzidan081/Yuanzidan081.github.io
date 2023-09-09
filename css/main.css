@@ -4859,10 +4859,9 @@ h1.article-title {
   left: -2px;
   right: -2px;
 }
-@media screen and (max-width: 768px) {
-  .md p.katex-block {
-    overflow: scroll;
-  }
+.katex-block {
+  overflow-x: auto;
+  overflow-y: auto;
 }
 .md-text .aplayer {
   border-radius: 12px;
