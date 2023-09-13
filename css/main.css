@@ -4860,8 +4860,8 @@ h1.article-title {
   right: -2px;
 }
 .katex-block {
-  overflow-x: scroll;
-  overflow-y: scroll;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 .md-text .aplayer {
   border-radius: 12px;
