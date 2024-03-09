@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-27adf681eca0a9fad51f1a1390936541.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-459809ca414cdca7569ea3b1cf8dc9b0.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-1c34d0542f21b36df01c8753276ca014.png">
-<meta property="og:image" content="https://pic4.zhimg.com/80/v2-29baf88e84959067f88c01f97666a534.png">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-44a64cb9d0923b6ba6c1d8260de5df0a.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-e967f673aaedb41cfbc37a5c7d186d65.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-7e6dc5f8de8811e5b619ba524ba400f6.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-82e769e664d909df42ccaa3011637288.png">
@@ -56,7 +56,7 @@
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-dce904a50a42ebbcdeb67070d81a46b8.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-a75121a85fc64ee0732456ff6048c7e5.png">
 <meta property="article:published_time" content="2024-03-09T11:07:07.000Z">
-<meta property="article:modified_time" content="2024-03-09T11:28:22.532Z">
+<meta property="article:modified_time" content="2024-03-09T11:32:57.193Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="设计模式">
 <meta name="twitter:card" content="summary">
@@ -239,7 +239,7 @@ B．抽象不应该依赖细节。细节应该依赖抽象。</p>
 <p>在双方都不太容易修改的时候再使用适配器模式适配，而不是一有不同时就使用它。</p>
 <p>适配器模式当然是好模式，但如果无视它的应用场合而盲目使用，其实是本末倒置了。</p>
 <h3 id="322-桥接模式"><a class="markdownIt-Anchor" href="#322-桥接模式"></a> 3.2.2 桥接模式</h3>
-<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic4.zhimg.com/80/v2-29baf88e84959067f88c01f97666a534.png" fancybox="true"></div></div>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic4.zhimg.com/80/v2-44a64cb9d0923b6ba6c1d8260de5df0a.png" fancybox="true"></div></div>
 <p>刚开始学会用面向对象的继承时，感觉它既新颖又功能强大，所以只要可以用，就都用上继承。这就好比是‘有了新锤子，所有的东西看上去都成了钉子。但事实上，很多情况用继承会带来麻烦。比如，对象的继承关系是在编译时就定义好了，所以无法在运行时改变从父类继承的实现。子类的实现与它的父类有非常紧密的依赖关系，以至于父类实现中的任何变化必然会导致子类发生变化。当你需要复用子类时，如果继承下来的实现不适合解决新的问题，则父类必须重写或被其他更适合的类替换。这种依赖关系限制了灵活性并最终限制了复用性。</p>
 <p>桥接模式（Bridge），将抽象部分与它的实现部分分离，使它们都可以独立地变化。</p>
 <p>什么叫抽象与它的实现分离，这并不是说，让抽象类与其派生类分离，因为这没有任何意义。实现指的是抽象类和它的派生类用来实现自己的对象。就刚才的例子而言，就是让‘手机’既可以按照品牌来分类，也可以按照功能来分类。</p>
