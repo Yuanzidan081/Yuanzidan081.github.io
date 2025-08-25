@@ -32,7 +32,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-0913c3231aee8ee85876effbeba71053.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-5391385d3bfcd40e2588dbc3ee4fe094.png">
-<meta property="og:image" content="https://pic4.zhimg.com/80/v2-cf7abc4a81737475188583eb353abc7c.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250716235202-2025-07-16.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-547fbba882e5d2e42f96d4f1973f3148.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-27adf681eca0a9fad51f1a1390936541.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-459809ca414cdca7569ea3b1cf8dc9b0.png">
@@ -56,7 +56,7 @@
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-9bd2a16687316219e0cde17a9e6b0935.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-a75121a85fc64ee0732456ff6048c7e5.png">
 <meta property="article:published_time" content="2024-03-09T11:07:07.000Z">
-<meta property="article:modified_time" content="2024-03-10T00:53:41.686Z">
+<meta property="article:modified_time" content="2025-07-16T15:53:18.855Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="设计模式">
 <meta name="twitter:card" content="summary">
@@ -194,7 +194,7 @@ B．抽象不应该依赖细节。细节应该依赖抽象。</p>
 <p>简单工厂模式’，也就是说，到底要实例化谁，将来会不会增加实例化的对象，比如增加开根运算，这是很容易变化的地方，应该考虑用一个单独的类来做这个创造实例的过程，这就是工厂</p>
 <p>简单工厂模式只是解决对象的创建问题，而且由于工厂本身包括了所有的算法实现方式，这些实现方式可能是经常需要改动的，每次维护或扩展都要改动这个工厂，以致代码需重新编译部署，这真的是很糟糕的处理方式，所以用它不是最好的办法。面对算法的时常变动，应该有更好的办法。</p>
 <h4 id="312-建造者模式"><a class="markdownIt-Anchor" href="#312-建造者模式"></a> 3.1.2 建造者模式</h4>
-<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic4.zhimg.com/80/v2-cf7abc4a81737475188583eb353abc7c.png" fancybox="true"></div></div>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250716235202-2025-07-16.png" fancybox="true"></div></div>
 <p>如果你需要将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示的意图时，我们需要应用于一个设计模式，‘建造者（Builder）模式’，又叫生成器模式。建造者模式可以将一个产品的内部表象与产品的生成过程分割开来，从而可以使一个建造过程生成具有不同的内部表象的产品对象。如果我们用了建造者模式，那么用户就只需指定需要建造的类型就可以得到它们，而具体建造的过程和细节就不需知道了。</p>
 <p>建造者模式（Builder），将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。</p>
 <p>建造者模式中有一个很重要的类，指挥者（Director），用它来控制建造过程，也用它来隔离用户与建造过程的关联。</p>
