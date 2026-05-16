@@ -20,26 +20,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
   
-  <title>《游戏引擎架构》笔记1：导论 - 小林up</title>
+  <title>《游戏引擎架构》笔记3：游戏软件工程基础 - 小林up</title>
 
   
-    <meta name="description" content="本文是阅读《游戏引擎架构》第一章&quot;导论”进行的归纳和总结。  下面展示了游戏引擎的架构图： 运行时引擎架构  目标硬件 设备驱动程序 操作系统 第三方软件开发包和中间件  数据结构和算法：STL、STLport、Boost、Loki 图形：Glide、OpenGL、DirectX、libgcm、Edge、Vulkan 碰撞和物理：Havok、PhysX、Open Dynamics En">
+    <meta name="description" content="本文是阅读《游戏引擎架构》第二章&quot;专业工具”进行的归纳和总结，部分内容经过了AI的扩展。   菱形继承   结构：  12345   A &#x2F;   \B     C \   &#x2F;   D  问题1：  基类A成员有多份冗余（数据冗余） 二义性（访问A的成员歧义）   解决1：  虚继承    1234class B : virtual public A &amp;#123;&amp;#125;;class">
 <meta property="og:type" content="article">
-<meta property="og:title" content="《游戏引擎架构》笔记1：导论">
-<meta property="og:url" content="https://yuanzidan081.github.io/2025/08/24/%E3%80%8A%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E3%80%8B%E7%AC%94%E8%AE%B01%EF%BC%9A%E5%AF%BC%E8%AE%BA/index.html">
+<meta property="og:title" content="《游戏引擎架构》笔记3：游戏软件工程基础">
+<meta property="og:url" content="https://yuanzidan081.github.io/2026/05/08/%E3%80%8A%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E3%80%8B%E7%AC%94%E8%AE%B03%EF%BC%9A%E6%B8%B8%E6%88%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%9F%BA%E7%A1%80/index.html">
 <meta property="og:site_name" content="小林up">
-<meta property="og:description" content="本文是阅读《游戏引擎架构》第一章&quot;导论”进行的归纳和总结。  下面展示了游戏引擎的架构图： 运行时引擎架构  目标硬件 设备驱动程序 操作系统 第三方软件开发包和中间件  数据结构和算法：STL、STLport、Boost、Loki 图形：Glide、OpenGL、DirectX、libgcm、Edge、Vulkan 碰撞和物理：Havok、PhysX、Open Dynamics En">
+<meta property="og:description" content="本文是阅读《游戏引擎架构》第二章&quot;专业工具”进行的归纳和总结，部分内容经过了AI的扩展。   菱形继承   结构：  12345   A &#x2F;   \B     C \   &#x2F;   D  问题1：  基类A成员有多份冗余（数据冗余） 二义性（访问A的成员歧义）   解决1：  虚继承    1234class B : virtual public A &amp;#123;&amp;#125;;class">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250824232539-2025-08-24.png">
-<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250825233902-2025-08-25.png">
-<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250825233938-2025-08-25.png">
-<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250825234059-2025-08-25.png">
-<meta property="article:published_time" content="2025-08-24T15:22:08.000Z">
-<meta property="article:modified_time" content="2025-08-25T15:46:49.471Z">
+<meta property="article:published_time" content="2026-05-08T14:43:44.000Z">
+<meta property="article:modified_time" content="2026-05-16T15:20:14.027Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="游戏引擎">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250824232539-2025-08-24.png">
   
   
 
@@ -110,191 +105,169 @@
 
 
 
-<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></div><div id="post-meta">发布于&nbsp;<time datetime="2025-08-24T15:22:08.000Z">2025-08-24</time></div></div>
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-05-08T14:43:44.000Z">2026-05-08</time></div></div>
 
 <article class='md-text content post'>
-<h1 class="article-title"><span>《游戏引擎架构》笔记1：导论</span></h1>
+<h1 class="article-title"><span>《游戏引擎架构》笔记3：游戏软件工程基础</span></h1>
 <blockquote>
-<p>本文是阅读《游戏引擎架构》第一章&quot;导论”进行的归纳和总结。</p>
+<p>本文是阅读《游戏引擎架构》第二章&quot;专业工具”进行的归纳和总结，部分内容经过了AI的扩展。</p>
 </blockquote>
-<p>下面展示了游戏引擎的架构图：</p>
-<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250824232539-2025-08-24.png" alt="运行时引擎架构" fancybox="true"></div><div class="image-meta"><span class="image-caption center">运行时引擎架构</span></div></div>
+<ol>
+<li>菱形继承</li>
+</ol>
 <ul>
-<li>目标硬件</li>
-<li>设备驱动程序</li>
-<li>操作系统</li>
-<li>第三方软件开发包和中间件
+<li>结构：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">   A</span><br><span class="line"> /   \</span><br><span class="line">B     C</span><br><span class="line"> \   /</span><br><span class="line">   D</span><br></pre></td></tr></table></figure>
 <ul>
-<li>数据结构和算法：<a target="_blank" rel="noopener" href="https://github.com/microsoft/STL">STL</a>、<a target="_blank" rel="noopener" href="https://sourceforge.net/projects/stlport/files/STLport/">STLport</a>、<a target="_blank" rel="noopener" href="https://github.com/boostorg/boost">Boost</a>、<a target="_blank" rel="noopener" href="https://github.com/grafana/loki">Loki</a></li>
-<li>图形：Glide、OpenGL、DirectX、libgcm、Edge、Vulkan</li>
-<li>碰撞和物理：Havok、<a target="_blank" rel="noopener" href="https://github.com/NVIDIAGameWorks/PhysX">PhysX</a>、<a target="_blank" rel="noopener" href="https://github.com/thomasmarsh/ODE">Open Dynamics Engine(ODE)</a></li>
-<li>角色动画：Granny、Havok Animation、Edge</li>
-<li>人工智能：Kynapse（路径搜寻、静态和动态物体回避、空间脆弱点辨认等）</li>
-<li>生物力学模型：Endorphin和Euphoria</li>
+<li><strong>问题1</strong>：
+<ul>
+<li>基类A成员有多份冗余（数据冗余）</li>
+<li>二义性（访问A的成员歧义）</li>
 </ul>
 </li>
-<li>平台独立层（中间接口层）
+<li><strong>解决1</strong>：
 <ul>
-<li>平台检测</li>
-<li>原子数据模型</li>
-<li>集合及迭代器</li>
-<li>文件系统</li>
-<li>网络传输层(UDP/TCP)</li>
-<li>高分辨率时钟</li>
-<li>线程库</li>
-<li>图形包裹类RHI</li>
-<li>物理/碰撞包裹类</li>
-</ul>
-</li>
-<li>核心系统
-<ul>
-<li>模块启动及终止</li>
-<li>断言</li>
-<li>单元测试</li>
-<li>内存分配</li>
-<li>数学库</li>
-<li>字符串及散列字符串标识符</li>
-<li>调试用打印及日志</li>
-<li>本地化服务</li>
-<li>影片播放器</li>
-<li>语法分析器（CSV、XML等）</li>
-<li>性能剖析/统计采集</li>
-<li>引擎配置（INI文件等）</li>
-<li>随机数生成器</li>
-<li>曲线及曲面库</li>
-<li>RTTI/反射/序列化</li>
-<li>对象句柄/唯一标识符</li>
-<li>异步文件I/O</li>
-<li>自定义数据结构及算法</li>
-</ul>
-</li>
-<li>资源管理器
-<ul>
-<li>三维模型资源</li>
-<li>纹理资源</li>
-<li>材质资源</li>
-<li>字体资源</li>
-<li>骨骼资源</li>
-<li>碰撞资源</li>
-<li>物理参数</li>
-<li>游戏世界/地图</li>
-<li>其他</li>
-</ul>
-</li>
-<li>渲染引擎：参考[1-3]
-<ul>
-<li>低阶渲染器
-<ul>
-<li>材质及着色器</li>
-<li>静态及动态光照</li>
-<li>摄像机</li>
-<li>文本及字体</li>
-<li>几何图元提交</li>
-<li>视区及虚拟屏幕</li>
-<li>纹理及表面管理</li>
-<li>调试绘图（直线等）</li>
-<li>图形设备接口</li>
-</ul>
-</li>
-<li>场景图/剔除优化
-<ul>
-<li>空间部分（BSP树/八叉树/kd树/包围球树）</li>
-<li>遮挡及潜在可见集（PVS）</li>
-<li>细致程度系统</li>
-</ul>
-</li>
-<li>视觉效果
-<ul>
-<li>粒子系统（烟/火/水花）</li>
-<li>贴花系统（弹孔/脚印）</li>
-<li>光照贴图（Light mapping）和环境贴图（Environment mapping）</li>
-<li>动态阴影</li>
-<li>全屏后期处理效果</li>
-<li>高动态范围（HDR）色调映射/bloom</li>
-<li>全屏抗锯齿</li>
-<li>颜色校正及颜色偏移，包括略过漂白/饱和度/去饱和度等</li>
-<li>PRT光照/次表面散射</li>
+<li>虚继承</li>
 </ul>
 </li>
 </ul>
-</li>
-<li>前端
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> : <span class="keyword">virtual</span> <span class="keyword">public</span> A &#123;&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> : <span class="keyword">virtual</span> <span class="keyword">public</span> A &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">D</span> : <span class="keyword">public</span> B, <span class="keyword">public</span> C &#123;&#125;;</span><br></pre></td></tr></table></figure>
 <ul>
-<li>平视显示器（HUD）</li>
-<li>游戏内置菜单、主控台、开发工具</li>
-<li>图形用户界面（GUI）</li>
-<li>全动视频（FMV）</li>
-<li>游戏内置电影（IGC）</li>
-<li>包裹/吸引模式</li>
+<li><strong>问题2</strong>：指针基类类型转换复杂，因为有多个vtable指针。</li>
+<li><strong>解决2</strong>：避免类似菱形继承这样的继承，可以选择继承多个没有父类的类。</li>
 </ul>
+<ol start="2">
+<li>
+<p>宏是预处理器的文本替换，跨C/C++作用域和命名空间范围，命名空间里要小心宏的跨作用域行为。</p>
 </li>
-<li>剖析和调试工具
+<li>
+<p>定点数和浮点数</p>
+</li>
+</ol>
 <ul>
-<li>录影和回放</li>
-<li>内存及性能统计：VTune、Quantify.Purify、Bounds Checker</li>
-<li>游戏内菜单或控制台</li>
-</ul>
+<li>
+<p>定点数：运算速度快，计算结果稳定，表示范围极小，大数小数不能同时存，固定比例缩放，极易溢出，无法自然表示极小/极大数值</p>
 </li>
-<li>碰撞和物理</li>
-<li>动画
+<li>
+<p>浮点数：数值范围超大，能表示极小到极大数，适用通用计算，运算相对慢，存在精度丢失，大小数混合计算误差累积</p>
+</li>
+</ul>
+<ol start="4">
+<li>基本数据类型</li>
+</ol>
 <ul>
-<li>精灵/纹理动画</li>
-<li>刚体层次结构动画</li>
-<li>骨骼动画：动画状态树及层、反向运动学、游戏后期处理、线性插值和加法混合、动画播放、子骨骼动画、动画解压</li>
-<li>顶点动画</li>
-<li>变形目标动画</li>
-<li>布娃娃（ragdoll）</li>
-</ul>
-</li>
-<li>人体学接口设备
+<li><code>char</code>：8位，不同编译器还分有符号和无符号</li>
+<li><code>int</code>/<code>short</code>/<code>long</code>：<code>int</code>在32位系统是32位，64位系统是64位。<code>short</code>比<code>int</code>小，多数机器位<code>16</code>位，<code>long</code>大于等于<code>int</code>为32位或64位。</li>
+<li><code>float</code>/<code>double</code>：多数为32位/64位。</li>
+<li><code>bool</code>：不同编译器实现不同8位/32位，不会实现为1位。</li>
+<li>其他：
 <ul>
-<li>键盘和鼠标</li>
-<li>游戏手柄</li>
-<li>其他游戏控制器</li>
+<li><code>Visual Studio</code>的<code>C/C++</code>需要知道某些变量的确切大小，定义扩展关键字声明特定位数变量：<code>__int8</code>、<code>__int16</code>、<code>__int32</code>、<code>__int64</code>。</li>
+<li>C++11在<code>&lt;cstdint&gt;</code>头文件定义了<code>std::int8_t</code>、<code>std::int16_t</code>、<code>std::int32_t</code>、<code>std::int64_t</code>、<code>std::uint8_t</code>、<code>std::uint16_t</code>、<code>std::uint32_t</code>、<code>std::uint64_t</code>，标准化特定大小整数类型。</li>
+<li>游戏引擎也可以自己定义基本数据类型。比如Radian和Degree来包装描述角度单位。</li>
 </ul>
 </li>
-<li>音频
+</ul>
+<ol start="5">
+<li>小端序和大端序问题解决办法：</li>
+</ol>
 <ul>
-<li>DSP/效果</li>
-<li>三维音频模型</li>
-<li>音频播放/管理</li>
+<li>所有数据以文字方式写入文件。多字节数值以一串十进制数字或十六进制数字,每数字一个字节写入。缺点是浪费空间。</li>
+<li>先用工具转换数据字节序，然后再把转换后的数据写进二进制文件。</li>
+<li>采用固定字节序的文件，程序读取文件按需转换（比如JPEG固定以大端序存储）。</li>
+<li>浮点数<code>float32</code>使用<code>union</code>保存数据而不是进行强制转换<code>int32</code>后改变字节序。</li>
 </ul>
-</li>
-<li>游戏性基本系统
+<ol start="6">
+<li>链接规范：内部链接（<code>static</code>）和外部链接（<code>extern</code>）</li>
+</ol>
 <ul>
-<li>游戏世界和游戏对象模型</li>
-<li>事件系统</li>
-<li>脚本系统</li>
-<li>人工智能基础</li>
-</ul>
-</li>
-<li>个别游戏专用子系统
+<li>全局变量 / 普通全局函数
 <ul>
-<li>地形渲染</li>
-<li>水体渲染</li>
-<li>玩家状态机及动画</li>
-<li>游戏摄像机</li>
-<li>人工智能</li>
+<li>不加 <code>static</code> → 外部链接</li>
+<li>加 <code>static</code> → 内部链接</li>
 </ul>
 </li>
-<li>资产管理
+<li>局部变量
 <ul>
-<li>三维网格</li>
-<li>骨骼动画</li>
-<li>音频</li>
-<li>粒子系统</li>
+<li>永远无链接，只在函数内生效</li>
 </ul>
 </li>
-<li>世界编辑器</li>
-<li>资源数据库</li>
-<li>构建工具</li>
+<li><code>const</code> 常量
+<ul>
+<li><code>const int x</code>：内部链接</li>
+<li><code>extern const int x</code>：改成外部链接</li>
 </ul>
-<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250825233902-2025-08-25.png" alt="独立工具架构" fancybox="true"></div><div class="image-meta"><span class="image-caption center">独立工具架构</span></div></div>
-<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250825233938-2025-08-25.png" alt="工具和游戏建立在相同框架" fancybox="true"></div><div class="image-meta"><span class="image-caption center">工具和游戏建立在相同框架</span></div></div>
-<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20250825234059-2025-08-25.png" alt="虚幻引擎的工具架构" fancybox="true"></div><div class="image-meta"><span class="image-caption center">虚幻引擎的工具架构</span></div></div>
-<p>[1] James D. Foley. 计算机图形学原理及实践C语言描述<br>
-[2] Tomas Akenine-Möller. 实时计算机图形学<br>
-[3] Alan Watt. 3D Computer Graphics</p>
+</li>
+<li><code>extern</code> 作用
+<ul>
+<li>声明外部链接的符号，告诉编译器：定义在别的文件</li>
+</ul>
+</li>
+</ul>
+<ol start="7">
+<li>映像文件的内存布局：</li>
+</ol>
+<ul>
+<li>代码段：可执行机器码</li>
+<li>数据段：初始化全局及静态变量</li>
+<li>BSS段：未初始化全局和静态变量。C/C++明确定义,任何未初始化的全局变量和静态变量皆为零。不过与其在BSS段存储可能很大块的零值，链接器只需简单地存储所需零值的字节个数,足以安置此段内未初始化的全局及静态变量。当操作系统载入程序时,便会保留BSS段所需的字节个数,并为该部分内存填入零,之后才调用程序进入点。</li>
+<li>只读数据段：只读(常量)全局变量。所有浮点常量(如<code>const float kPi =3.141592f;</code>)及所有用const关键字声明的全局对象实例(如<code>const Foo gReadOnlyFoo;</code>)就隶属此段。编译器通常把整数常量(如<code>const int kMaxMonsters =255;</code>)视为明示常量(manifest constant)，并且直接把明示常量插进机器码中。明示常量直接占用代码段的存储空间，而不存储于只读数据段。</li>
+</ul>
+<ol start="8">
+<li>对象的内存布局</li>
+</ol>
+<ul>
+<li><code>extern</code>声明的全局变量以及类声明内的类静态变量并不占用内存，必须在一个<code>.cpp</code>文件内定义类静态变量以分配内存。</li>
+<li>对齐和填充：<br>
+数据对象的对齐是指其内存地址是否为对齐字节大小的倍数（通常是2的幂次）：
+<ul>
+<li>1字节对齐的对象，可置于任何地址。</li>
+<li>2字节对齐的对象，地址必须是2的倍数。</li>
+<li>4字节对齐的对象，地址必须是4的倍数。</li>
+<li>包含4个浮点数的SIMD矢量通常需要16字节对齐。</li>
+<li>结构体末端可能加入填充字节，其对齐需求等同于其成员中的最大对齐需求。</li>
+</ul>
+</li>
+</ul>
+<ol start="9">
+<li>C++类的内存布局：</li>
+</ol>
+<ul>
+<li>类的派生类会简单地把其数据成员附加到末端，即使类之间可能因对齐而加入填充。</li>
+<li>虚函数会在类的布局添加4字节/8字节，通常放在类的最前端，称为虚表指针，指向名为虚函数表的数据结构，各个类的虚函数表包含该类声明或继承来的所有虚函数指针。每个非抽象类类有一个虚函数表，类的实例用虚表指针指向该虚函数表。</li>
+</ul>
+<ol start="10">
+<li>错误处理</li>
+</ol>
+<ul>
+<li>异常会有一些开销：调用帧会变大，堆栈的开解通常较单纯返回函数慢。一个好的替代方案是在出错时返回错误值，并且显式处理这些错误。</li>
+<li>断言：下面是在<code>Windows</code>平台给的一个宏定义的断言例子：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span>   <span class="comment">// 必须头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> ASSERTIONS_ENABLED</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ASSERT(expr) \</span></span><br><span class="line"><span class="meta">do &#123; \</span></span><br><span class="line"><span class="meta">    <span class="keyword">if</span> (!(expr)) &#123; \</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;断言失败：%s  文件：%s  行号：%d\n&quot;</span>, <span class="meta">#expr, __FILE__, __LIN E__); \</span></span><br><span class="line"><span class="meta">        DebugBreak();  <span class="comment">// Windows Win32 API \</span></span></span><br><span class="line"><span class="comment"><span class="meta">    &#125; \</span></span></span><br><span class="line"><span class="comment"><span class="meta">&#125; while(0)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="comment">// 发布版本直接空语句</span></span><br><span class="line"> </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ASSERT(expr) ((void)0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<ol start="11">
+<li>链接器对代码的内存布局的影响：</li>
+</ol>
+<ul>
+<li>单个函数的机器码几乎总是置于连续的内存中。在绝大多数情况下,链接器不会把一个函数切开，并在中间放置另一个函数。</li>
+<li>编译器和链接器按函数在翻译单元源代码(.cpp文件)中的出现次序排列内存布局。即位于一个翻译单元内的函数总是置于连续内存中。即链接器永不会把已编译的翻译单元切开，中间插入其他翻译单元的代码。</li>
+</ul>
+<ol start="12">
+<li>降低指令缓存不命中率：</li>
+</ol>
+<ul>
+<li>高效能代码的体积越小越好,体积以机器码指令数目为单位。（编译器和链接器会负责把函数置于连续内存中。）</li>
+<li>若要调用某函数，就把该函数置于最接近调用函数的地方，最好是紧接调用函数的前后，而不要把该函数置于另一翻译单元(因为这样会完全无法控制两个函数的距离)。</li>
+<li>谨慎地使用内联函数。内联小型函数能增进效能。然而,过多的内联会增大代码体积，使性能关键代码再不能完全装进缓存。</li>
+</ul>
+<ol start="13">
+<li>CPU指令流水线问题：</li>
+</ol>
+<ul>
+<li>数据依赖造成的流水线停顿（气泡）。</li>
+<li>分支预测。</li>
+<li>load-hit-store：如浮点数转换至整数,然后把结果用于之后的运算时产生停顿，因为CPU在将<code>float</code>转换至<code>int</code>时,无法直接把数据从浮点寄存器传送至整数寄存器。因此，该结果必须从浮点寄存器写进内存，然后再从内存读进整数寄存器。</li>
+</ul>
 
 
 <div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
@@ -302,7 +275,7 @@
 
 </article>
 
-<div class="related-wrap reveal" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2025/08/27/%E3%80%8A%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E3%80%8B%E7%AC%94%E8%AE%B02%EF%BC%9A%E4%B8%93%E4%B8%9A%E5%B7%A5%E5%85%B7/">《游戏引擎架构》笔记2：专业工具</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2025/02/02/%E3%80%8A%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%85%A8%E3%80%8B%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">《代码大全》阅读笔记</a></div></section></div>
+<div class="related-wrap reveal" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2025/12/31/2025%E6%80%BB%E7%BB%93%E2%80%94%E2%80%94%E5%B7%A5%E4%BD%9C%E7%AC%AC%E4%B8%80%E5%B9%B4/">2025总结——工作第一年</a></div></section></div>
 
 
 
