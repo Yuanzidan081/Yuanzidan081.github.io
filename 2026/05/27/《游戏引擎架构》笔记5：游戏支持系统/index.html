@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 6.3.0">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.18.5">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://gcore.jsdelivr.net'>
+  <link rel="preconnect" href="https://gcore.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  
+  <title>《游戏引擎架构》笔记5：游戏支持系统 - 小林up</title>
+
+  
+    <meta name="description" content="1. 子系统的启动和终止 子系统互相依赖，启动次序很关键，控制次序方案：  1.1 单例全局变量❌️  程序进入点（main()或WinMain()）前全局及静态对象构造函数调用次序无法预知 程序（main()或WinMain()）结束返回后全局及静态对象析构函数调用次序无法预知 因此不能使用单例：单例构建时依赖的单例可能还未构建，单例析构时依赖的单例可能已经析构。  1234567891011">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《游戏引擎架构》笔记5：游戏支持系统">
+<meta property="og:url" content="https://yuanzidan081.github.io/2026/05/27/%E3%80%8A%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E3%80%8B%E7%AC%94%E8%AE%B05%EF%BC%9A%E6%B8%B8%E6%88%8F%E6%94%AF%E6%8C%81%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="小林up">
+<meta property="og:description" content="1. 子系统的启动和终止 子系统互相依赖，启动次序很关键，控制次序方案：  1.1 单例全局变量❌️  程序进入点（main()或WinMain()）前全局及静态对象构造函数调用次序无法预知 程序（main()或WinMain()）结束返回后全局及静态对象析构函数调用次序无法预知 因此不能使用单例：单例构建时依赖的单例可能还未构建，单例析构时依赖的单例可能已经析构。  1234567891011">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260530233142-2026-05-30.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260530233558-2026-05-30.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614210747-2026-06-14.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614214034-2026-06-14.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614214232-2026-06-14.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614232910-2026-06-14.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614232953-2026-06-14.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260615000042-2026-06-15.png">
+<meta property="article:published_time" content="2026-05-27T15:56:12.000Z">
+<meta property="article:modified_time" content="2026-06-15T16:09:16.402Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="游戏引擎">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260530233142-2026-05-30.png">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/redcell.ico">
+  
+
+  
+
+  
+
+
+  
+    
+      <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+    
+  
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+  
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div><div class="sub normal cap">一个长期主义者</div><div class="sub hover cap" style="opacity:0"> 十年饮冰，冷暖自知</div></a></div>
+
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/wiki/">项目</a><a class="nav-item" href="/notes/">笔记</a><a class="nav-item" href="/friends/">社交</a></nav>
+</header>
+
+
+<div class="widgets">
+
+<widget class="widget-wrapper toc single" id="data-toc"><div class="widget-header cap dis-select"><span class="name">《游戏引擎架构》笔记5：游戏支持系统</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%90%AF%E5%8A%A8%E5%92%8C%E7%BB%88%E6%AD%A2"><span class="toc-text"> 1. 子系统的启动和终止</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E5%8D%95%E4%BE%8B%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%EF%B8%8F"><span class="toc-text"> 1.1 单例全局变量❌️</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E6%8C%89%E9%9C%80%E6%9E%84%E5%BB%BA%EF%B8%8F"><span class="toc-text"> 1.2 静态变量按需构建❌️</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#121-%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%8D%95%E4%BE%8B%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="toc-text"> 1.2.1 静态变量单例代码示例：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#122-%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E5%8D%95%E4%BE%8B%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="toc-text"> 1.2.2 动态分配单例代码示例：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-%E5%9C%A8main%E4%B8%AD%E6%98%BE%E5%BC%8F%E6%8C%89%E6%AC%A1%E5%BA%8F%E8%B0%83%E7%94%A8%E5%90%AF%E5%8A%A8%E7%BB%88%E6%AD%A2%E5%87%BD%E6%95%B0%EF%B8%8F"><span class="toc-text"> 1.3 在main()中显式按次序调用启动终止函数✅️</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-%E5%90%84%E4%B8%AA%E7%AE%A1%E7%90%86%E5%99%A8%E6%B3%A8%E5%86%8C%E5%88%B0%E5%85%A8%E5%B1%80%E7%9A%84%E6%9C%89%E9%99%90%E9%98%9F%E5%88%97%E6%8C%89%E6%81%B0%E5%BD%93%E6%AC%A1%E5%BA%8F%E9%80%90%E4%B8%80%E5%90%AF%E5%8A%A8%E6%89%80%E6%9C%89%E7%AE%A1%E7%90%86%E5%99%A8%EF%B8%8F"><span class="toc-text"> 1.4 各个管理器注册到全局的有限队列，按恰当次序逐一启动所有管理器✅️</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-%E9%80%9A%E8%BF%87%E7%AE%A1%E7%90%86%E5%99%A8%E5%88%97%E4%B8%BE%E4%BE%9D%E8%B5%96%E7%9A%84%E7%AE%A1%E7%90%86%E5%99%A8%E5%AE%9A%E4%B9%89%E7%AE%A1%E7%90%86%E5%99%A8%E9%97%B4%E7%9A%84%E4%BE%9D%E8%B5%96%E5%9B%BE%E6%8C%89%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E8%AE%A1%E7%AE%97%E6%9C%80%E4%BC%98%E7%9A%84%E5%90%AF%E5%8A%A8%E6%AC%A1%E5%BA%8F%EF%B8%8F"><span class="toc-text"> 1.5 通过管理器列举依赖的管理器，定义管理器间的依赖图，按依赖关系计算最优的启动次序✅️</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-%E5%AE%9E%E9%99%85%E5%BC%95%E6%93%8E%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="toc-text"> 1.6 实际引擎的例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-text"> 2. 内存管理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E4%BC%98%E5%8C%96%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-text"> 2.1 优化动态内存分配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E5%B8%B8%E8%A7%81%E7%9A%84%E5%AE%9A%E5%88%B6%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2 常见的定制内存分配器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#221-%E5%9F%BA%E4%BA%8E%E5%A0%86%E6%A0%88%E7%9A%84%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2.1 基于堆栈的分配器：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#222-%E5%8F%8C%E7%AB%AF%E5%A0%86%E6%A0%88%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2.2 双端堆栈分配器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#223-%E6%B1%A0%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2.3 池分配器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#224-%E5%90%AB%E5%AF%B9%E9%BD%90%E5%8A%9F%E8%83%BD%E7%9A%84%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2.4 含对齐功能的分配器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#225-%E5%8D%95%E5%B8%A7%E5%92%8C%E5%8F%8C%E7%BC%93%E5%86%B2%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2.5 单帧和双缓冲内存分配器</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2251-%E5%8D%95%E5%B8%A7%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2.5.1 单帧分配器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2252-%E5%8F%8C%E7%BC%93%E5%86%B2%E5%88%86%E9%85%8D%E5%99%A8"><span class="toc-text"> 2.2.5.2 双缓冲分配器</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E5%86%85%E5%AD%98%E7%A2%8E%E7%89%87"><span class="toc-text"> 2.3 内存碎片</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#231-%E7%94%A8%E5%A0%86%E6%A0%88%E5%92%8C%E6%B1%A0%E5%88%86%E9%85%8D%E5%99%A8%E9%81%BF%E5%85%8D%E5%86%85%E5%AD%98%E7%A2%8E%E7%89%87"><span class="toc-text"> 2.3.1 用堆栈和池分配器避免内存碎片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#232-%E7%A2%8E%E7%89%87%E6%95%B4%E7%90%86%E5%92%8C%E9%87%8D%E5%AE%9A%E4%BD%8D"><span class="toc-text"> 2.3.2 碎片整理和重定位</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AE%B9%E5%99%A8"><span class="toc-text"> 3. 容器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#31-%E5%AE%B9%E5%99%A8%E6%93%8D%E4%BD%9C"><span class="toc-text"> 3.1 容器操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#32-%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="toc-text"> 3.2 迭代器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#33-%E7%AE%97%E6%B3%95%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-text"> 3.3 算法复杂度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#34-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AE%B9%E5%99%A8"><span class="toc-text"> 3.4 自定义容器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#35-%E4%B8%80%E4%BA%9B%E5%AE%B9%E5%99%A8%E5%AE%9E%E7%8E%B0"><span class="toc-text"> 3.5 一些容器实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#351-%E6%95%B0%E7%BB%84"><span class="toc-text"> 3.5.1 数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#352-%E9%93%BE%E8%A1%A8"><span class="toc-text"> 3.5.2 链表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#353-%E5%AD%97%E5%85%B8%E5%92%8C%E6%95%A3%E5%88%97%E8%A1%A8"><span class="toc-text"> 3.5.3 字典和散列表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-text"> 4. 字符串</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#41-%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98"><span class="toc-text"> 4.1 字符串的使用问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#42-%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB"><span class="toc-text"> 4.2 字符串类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#43-%E5%94%AF%E4%B8%80%E6%A0%87%E8%AF%86%E7%AC%A6"><span class="toc-text"> 4.3 唯一标识符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#44-%E6%9C%AC%E5%9C%B0%E5%8C%96"><span class="toc-text"> 4.4 本地化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%BC%95%E6%93%8E%E9%85%8D%E7%BD%AE"><span class="toc-text"> 5. 引擎配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#51-%E8%AF%BB%E5%86%99%E9%80%89%E9%A1%B9"><span class="toc-text"> 5.1 读&#x2F;写选项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#52-%E4%B8%AA%E5%88%AB%E7%94%A8%E6%88%B7%E9%80%89%E9%A1%B9"><span class="toc-text"> 5.2 个别用户选项</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#53-%E5%BC%95%E6%93%8E%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="toc-text"> 5.3 引擎配置管理</span></a></li></ol></li></ol></div></div></widget>
+
+<widget class="widget-wrapper search"><div class="widget-body"><div class="search-wrapper" id="search"><form class="search-form"><input type="text" class="search-input" id="search-input" placeholder="文章搜索"><svg t="1670596976048" class="icon search-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2676" width="200" height="200"><path d="M938.2 832.6L723.8 618.1c-2.5-2.5-5.3-4.4-7.9-6.4 36.2-55.6 57.3-121.8 57.3-193.1C773.3 222.8 614.6 64 418.7 64S64 222.8 64 418.6c0 195.9 158.8 354.6 354.6 354.6 71.3 0 137.5-21.2 193.2-57.4 2 2.7 3.9 5.4 6.3 7.8L832.5 938c14.6 14.6 33.7 21.9 52.8 21.9 19.1 0 38.2-7.3 52.8-21.8 29.2-29.1 29.2-76.4 0.1-105.5M418.7 661.3C284.9 661.3 176 552.4 176 418.6 176 284.9 284.9 176 418.7 176c133.8 0 242.6 108.9 242.6 242.7 0 133.7-108.9 242.6-242.6 242.6" p-id="2677"></path></svg></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div></div></widget>
+
+
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/Yuanzidan081" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/social/08a41b181ce68.svg"/></a><a class="social" href="https://blog.csdn.net/subtitle_?spm=1000.2115.3001.5343" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/Yuanzidan081/picx-images-hosting/master/20240101/csdn.6umiks9rxx80.svg"/></a><a class="social" href="https://www.zhihu.com/people/tian-xin-63-17" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/Yuanzidan081/picx-images-hosting/master/20240101/zhihu.s485uwaltjk.svg"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-05-27T15:56:12.000Z">2026-05-27</time></div></div>
+
+<article class='md-text content post'>
+<h1 class="article-title"><span>《游戏引擎架构》笔记5：游戏支持系统</span></h1>
+<h2 id="1-子系统的启动和终止"><a class="markdownIt-Anchor" href="#1-子系统的启动和终止"></a> 1. 子系统的启动和终止</h2>
+<p>子系统互相依赖，启动次序很关键，控制次序方案：</p>
+<h3 id="11-单例全局变量️"><a class="markdownIt-Anchor" href="#11-单例全局变量️"></a> 1.1 单例全局变量❌️</h3>
+<ul>
+<li>程序进入点（<code>main()</code>或<code>WinMain()</code>）前全局及静态对象构造函数调用次序无法预知</li>
+<li>程序（<code>main()</code>或<code>WinMain()</code>）结束返回后全局及静态对象析构函数调用次序无法预知</li>
+<li>因此不能使用单例：单例构建时依赖的单例可能还未构建，单例析构时依赖的单例可能已经析构。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Manager</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Manager</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 启动管理器</span></span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Manager</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 终止管理器</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> Manager manager;</span><br></pre></td></tr></table></figure>
+<h3 id="12-静态变量按需构建️"><a class="markdownIt-Anchor" href="#12-静态变量按需构建️"></a> 1.2 静态变量按需构建❌️</h3>
+<p>主要分为静态变量单例和动态分配单例两种方式。</p>
+<p>优点是：在第一次调用时才会被初始化，因此可以把全局单例改为静态变量，控制构建次序。但缺点也很明显：不可控制析构次序，且很难预计单例确切构建时间。</p>
+<p>要解决析构次序问题，可以在单例构建时，把自己登记在一个全局堆栈，<code>main</code>结束前，逐一把堆栈弹出调用终止函数，但有时候不能解决所有情况。</p>
+<h4 id="121-静态变量单例代码示例"><a class="markdownIt-Anchor" href="#121-静态变量单例代码示例"></a> 1.2.1 静态变量单例代码示例：</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Manager</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> Manager&amp; <span class="title">Get</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">static</span> Manager instance;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Manager</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 加载其他依赖</span></span><br><span class="line">        Dep1Manager::<span class="built_in">Get</span>();</span><br><span class="line">        Dep2Manager::<span class="built_in">Get</span>();</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Manager</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 终止管理器</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="122-动态分配单例代码示例"><a class="markdownIt-Anchor" href="#122-动态分配单例代码示例"></a> 1.2.2 动态分配单例代码示例：</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Manager</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> Manager&amp; <span class="title">Get</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">static</span> Manager* pInstance = <span class="literal">nullptr</span>;</span><br><span class="line">        <span class="keyword">if</span> (pInstance == <span class="literal">nullptr</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            pInstance = <span class="keyword">new</span> <span class="built_in">Manager</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">ASSERT</span>(pInstance != <span class="literal">nullptr</span>);</span><br><span class="line">        <span class="keyword">return</span> *pInstance;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="13-在main中显式按次序调用启动终止函数️"><a class="markdownIt-Anchor" href="#13-在main中显式按次序调用启动终止函数️"></a> 1.3 在<code>main()</code>中显式按次序调用启动终止函数✅️</h3>
+<p>简单可控，但手动维护易出错。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Game</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Game</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 什么也不做</span></span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">Game</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 什么也不做</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">StartUp</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 启动游戏</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Shutdown</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 终止游戏</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dep1Manager</span> &#123;<span class="comment">/* 类似内容 */</span>&#125;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dep2Manager</span> &#123;<span class="comment">/* 类似内容 */</span>&#125;</span><br><span class="line"></span><br><span class="line">Game game;</span><br><span class="line">Dep1Manager dep1Manager;</span><br><span class="line">Dep2Manager dep2Manager;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 启动依赖</span></span><br><span class="line">    Dep1Manager.<span class="built_in">StartUp</span>();</span><br><span class="line">    Dep2Manager.<span class="built_in">StartUp</span>();</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="comment">// 启动游戏</span></span><br><span class="line">    Game.<span class="built_in">StartUp</span>();</span><br><span class="line">    <span class="comment">// 终止游戏</span></span><br><span class="line">    Game.<span class="built_in">Shutdown</span>();</span><br><span class="line">    <span class="comment">// 终止依赖</span></span><br><span class="line">    Dep2Manager.<span class="built_in">Shutdown</span>();</span><br><span class="line">    Dep1Manager.<span class="built_in">Shutdown</span>();</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="14-各个管理器注册到全局的有限队列按恰当次序逐一启动所有管理器️"><a class="markdownIt-Anchor" href="#14-各个管理器注册到全局的有限队列按恰当次序逐一启动所有管理器️"></a> 1.4 各个管理器注册到全局的有限队列，按恰当次序逐一启动所有管理器✅️</h3>
+<h3 id="15-通过管理器列举依赖的管理器定义管理器间的依赖图按依赖关系计算最优的启动次序️"><a class="markdownIt-Anchor" href="#15-通过管理器列举依赖的管理器定义管理器间的依赖图按依赖关系计算最优的启动次序️"></a> 1.5 通过管理器列举依赖的管理器，定义管理器间的依赖图，按依赖关系计算最优的启动次序✅️</h3>
+<h3 id="16-实际引擎的例子"><a class="markdownIt-Anchor" href="#16-实际引擎的例子"></a> 1.6 实际引擎的例子</h3>
+<ul>
+<li>OGRE：<code>Ogre::Root</code>单例统一启动和终止子系统（动态创建）。扩展需要修改<code>Ogre::Root</code>的构造函数和析构函数，违反开闭原则。</li>
+<li>顽皮狗神秘海域/最后生还者引擎：可行情况避免动态内存分配，单例使用静态分配对象。</li>
+</ul>
+<h2 id="2-内存管理"><a class="markdownIt-Anchor" href="#2-内存管理"></a> 2. 内存管理</h2>
+<h3 id="21-优化动态内存分配"><a class="markdownIt-Anchor" href="#21-优化动态内存分配"></a> 2.1 优化动态内存分配</h3>
+<ul>
+<li>维持最低限度的堆分配，并且永不再在凑循环中使用堆分配。</li>
+<li>定制分配器的优势（可以参考<a target="_blank" rel="noopener" href="https://www.swedishcoding.com/2008/08/31/are-we-out-of-memory/">Are we out of memory?</a>）：
+<ol>
+<li>预分配内存完成分配，在用户模式进行，不用进入内核模式切换上下文；</li>
+<li>对使用模式设置不同的假设，比通用分配器高效。</li>
+</ol>
+</li>
+</ul>
+<h3 id="22-常见的定制内存分配器"><a class="markdownIt-Anchor" href="#22-常见的定制内存分配器"></a> 2.2 常见的定制内存分配器</h3>
+<h4 id="221-基于堆栈的分配器"><a class="markdownIt-Anchor" href="#221-基于堆栈的分配器"></a> 2.2.1 基于堆栈的分配器：</h4>
+<ol>
+<li>原理：分配一大块连续内存或一个全局字节数组，安排一个指针指向堆栈的顶端，指针以下的内存是已分配的，指针以上的内存是未分配的。对于每个分配或释放要求，移动指针即可。</li>
+<li>特点：注意不能以任意次序释放内存，必须以分配时相反的次序释放内存。实现时可以提供一个函数把堆栈顶端指针回滚到之前标记的位置，释放从回滚点到目前堆栈顶端之间的所有内存。而回滚顶端指针时，回滚的位置必须在两个分配而来的内存块之间的边界。</li>
+<li>代码示例实现：</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">StackAllocator</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 回滚标记</span></span><br><span class="line">    <span class="keyword">typedef</span> U32 Marker;</span><br><span class="line">    <span class="comment">// 总大小，构建堆栈分配器</span></span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">StackAllocator</span><span class="params">(U32 stackSizeBytes)</span></span>;</span><br><span class="line">    <span class="comment">// 分配内存</span></span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="title">alloc</span><span class="params">(U32 sizeBytes)</span></span>;</span><br><span class="line">    <span class="comment">// 获取回滚标记</span></span><br><span class="line">    <span class="function">Marker <span class="title">getMarker</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 回滚到指定标记</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">freeTMarker</span><span class="params">(Marker marker)</span></span>;</span><br><span class="line">    <span class="comment">// 清空堆栈分配器</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">clear</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260530233142-2026-05-30.png" fancybox="true"></div></div>
+<h4 id="222-双端堆栈分配器"><a class="markdownIt-Anchor" href="#222-双端堆栈分配器"></a> 2.2.2 双端堆栈分配器</h4>
+<ol>
+<li>原理：一块内存可以给两个堆栈分配器使用，一个从内存块低端向上分配，另一个从顶端向下分配。比如底堆栈可以用来载入和卸载游戏关卡，顶堆栈可以用来分配临时内存块，临时内存在每帧分配及释放。</li>
+</ol>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260530233558-2026-05-30.png" fancybox="true"></div></div>
+<h4 id="223-池分配器"><a class="markdownIt-Anchor" href="#223-池分配器"></a> 2.2.3 池分配器</h4>
+<ol>
+<li>场景：分配大量同等尺寸的小块内存，所以池内存是分配元素大小的倍数。</li>
+<li>原理：池的元素可以放在一个链表里，初始化链表包含所有元素，当需要分配元素取出自由链表的下一个元素，释放则把元素放回链表。具体可以有以下几种分类和设计：</li>
+</ol>
+<ul>
+<li>元素尺寸大于指针，自由块内存存储<code>next</code>指针(<code>union</code>)，分配时<code>next</code>指针被覆盖为真正的内容；</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdlib&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 64位下指针占 8 字节，这里元素整体大小 &gt; 8 字节</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Block</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 联合体：自由状态存next指针，使用状态存业务数据</span></span><br><span class="line">    <span class="keyword">union</span></span><br><span class="line">    &#123;</span><br><span class="line">        Block* next;     <span class="comment">// 自由块：下一个节点指针</span></span><br><span class="line">        <span class="type">char</span> data[<span class="number">16</span>];   <span class="comment">// 业务数据(16字节 &gt; 8字节指针)</span></span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">constexpr</span> <span class="type">int</span> POOL_SIZE = <span class="number">32</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MemPool</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    Block m_pool[POOL_SIZE];</span><br><span class="line">    Block* m_freeHead;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemPool</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 初始化自由链表</span></span><br><span class="line">        m_freeHead = &amp;m_pool[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; POOL_SIZE - <span class="number">1</span>; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            m_pool[i].next = &amp;m_pool[i + <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        m_pool[POOL_SIZE - <span class="number">1</span>].next = <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 分配</span></span><br><span class="line">    <span class="function">Block* <span class="title">Alloc</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!m_freeHead) <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">        Block* curr = m_freeHead;</span><br><span class="line">        m_freeHead = m_freeHead-&gt;next;</span><br><span class="line">        <span class="keyword">return</span> curr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 回收</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Free</span><span class="params">(Block* ptr)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        ptr-&gt;next = m_freeHead;</span><br><span class="line">        m_freeHead = ptr;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>若元素尺寸小于指针，可以用池元素的索引代替指针实现链表（类似<code>union</code>不表示元素的时候内存被当做<code>next</code>，里面的元素为索引）。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdint&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdlib&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> Elem = <span class="type">int16_t</span>;    <span class="comment">// 2字节元素</span></span><br><span class="line"><span class="keyword">using</span> Idx  = <span class="type">uint16_t</span>;   <span class="comment">// 16位索引，刚好塞入元素</span></span><br><span class="line"><span class="keyword">constexpr</span> Idx NULL_IDX = <span class="number">0xFFFF</span>;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="type">size_t</span> POOL_CNT = <span class="number">32</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MemPool</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    Elem* m_pool;</span><br><span class="line">    Idx   m_freeHead;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemPool</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        m_pool = <span class="built_in">static_cast</span>&lt;Elem*&gt;(std::<span class="built_in">malloc</span>(POOL_CNT   * <span class="built_in">sizeof</span>(Elem)));</span><br><span class="line">        m_freeHead = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 初始化自由链表：元素内存存下一个索引</span></span><br><span class="line">        <span class="keyword">for</span> (Idx i = <span class="number">0</span>; i &lt; POOL_CNT - <span class="number">1</span>; ++i)</span><br><span class="line">            *<span class="built_in">reinterpret_cast</span>&lt;Idx*&gt;(&amp;m_pool[i]) = i + <span class="number">1</span>;</span><br><span class="line">        *<span class="built_in">reinterpret_cast</span>&lt;Idx*&gt;(&amp;m_pool[POOL_CNT - <span class="number">1</span>]) =   NULL_IDX;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">MemPool</span>() &#123; std::<span class="built_in">free</span>(m_pool); &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 分配</span></span><br><span class="line">    <span class="function">Elem* <span class="title">Alloc</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (m_freeHead == NULL_IDX) <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">        Idx curr = m_freeHead;</span><br><span class="line">        m_freeHead = *<span class="built_in">reinterpret_cast</span>&lt;Idx*&gt;(&amp;m_pool  [curr]);</span><br><span class="line">        <span class="keyword">return</span> &amp;m_pool[curr];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 回收</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Free</span><span class="params">(Elem* ptr)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Idx idx = <span class="built_in">static_cast</span>&lt;Idx&gt;(ptr - m_pool);</span><br><span class="line">        *<span class="built_in">reinterpret_cast</span>&lt;Idx*&gt;(ptr) = m_freeHead;</span><br><span class="line">        m_freeHead = idx;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="224-含对齐功能的分配器"><a class="markdownIt-Anchor" href="#224-含对齐功能的分配器"></a> 2.2.4 含对齐功能的分配器</h4>
+<ol>
+<li>
+<p>原理：所有内存分配器都必须传回对齐的内存块，在分配内存时，分配比请求所需多一点的内存，向上调整内存地址至适当的对齐，传回调整后的地址。 <strong>重点是计算调整偏移量</strong>：用掩码把原来内存块地址的最低有效位取出，再用期望的对齐值减去它，就是调整偏移量。对齐应该是2的幂次，只要把对齐减一。比如16字节对齐，掩码就是<code>mask=16-1=15=0x0F</code>，原地址为<code>x</code>，那么最后对齐的地址就是<code>x + (0x0F - (x &amp; mask))</code>。</p>
+</li>
+<li>
+<p>代码示例实现</p>
+</li>
+</ol>
+<ul>
+<li>对齐分配函数：先多分配一段空间，再通过地址计算找到符合对齐要求的地址。注意释放要转换调整后的地址为原本的可能未对齐的地址。要完成这个转换需要存储元信息，在调整后地址之前的1字节存储偏移量即可，有了这个信息就可以还原原来的地址。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对齐分配函数。注意，&quot;alignment&quot; 必须为2的幂（一般是4或16）</span></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">allocateAligned</span><span class="params">(<span class="type">size_t</span> size_bytes, <span class="type">size_t</span> alignment)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">ASSERT</span>(alignment &gt; <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">ASSERT</span>(alignment &lt;= <span class="number">128</span>);</span><br><span class="line">    <span class="built_in">ASSERT</span>((alignment &amp; (alignment - <span class="number">1</span>)) == <span class="number">0</span>); <span class="comment">// 2的幂</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 计算总共要分配的内存量</span></span><br><span class="line">    <span class="type">size_t</span> expandedSize_bytes = size_bytes + alignment;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 分配未对齐的内存块, 并转换地址为 uintptr_t</span></span><br><span class="line">    <span class="type">uintptr_t</span> rawAddress = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">uintptr_t</span>&gt;(</span><br><span class="line">        <span class="built_in">allocateUnaligned</span>(expandedSize_bytes));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用掩码去除地址低位部分, 计算&quot;错位&quot;量, 从而计算调整量</span></span><br><span class="line">    <span class="type">size_t</span> mask = (alignment - <span class="number">1</span>);</span><br><span class="line">    <span class="type">uintptr_t</span> misalignment = (rawAddress &amp; mask);</span><br><span class="line">    <span class="type">ptrdiff_t</span> adjustment = alignment - misalignment;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 计算调整后的地址</span></span><br><span class="line">    <span class="type">uintptr_t</span> alignedAddress = rawAddress + adjustment;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 把alignment存储在调整后地址的前4字节</span></span><br><span class="line">    <span class="built_in">ASSERT</span>(alignment &lt; <span class="number">256</span>);</span><br><span class="line">    U8* pAdjustment = <span class="built_in">reinterpret_cast</span>&lt;U8*&gt;(alignedAddress);</span><br><span class="line">    *pAdjustment[<span class="number">-1</span>] = <span class="built_in">static_cast</span>&lt;U8&gt;(alignment); <span class="comment">// 等价 *(pAdjustment - 1) = static_cast&lt;U8&gt;(alignment);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">void</span>*&gt;(alignedAddress);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>释放对齐内存块:</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">freeAligned</span><span class="params">(<span class="type">void</span>* pMem)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">const</span> U8* pAlignedMem</span><br><span class="line">        = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">const</span> U8*&gt;(pMem);</span><br><span class="line"></span><br><span class="line">    <span class="type">uintptr_t</span> alignedAddress</span><br><span class="line">        = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">uintptr_t</span>&gt;(pMem);</span><br><span class="line"></span><br><span class="line">    <span class="type">ptrdiff_t</span> adjustment</span><br><span class="line">        = <span class="built_in">static_cast</span>&lt;<span class="type">ptrdiff_t</span>&gt;(pAlignedMem[<span class="number">-1</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="type">uintptr_t</span> rawAddress = alignedAddress - adjustment;</span><br><span class="line"></span><br><span class="line">    <span class="type">void</span>* pRawMem = <span class="built_in">reinterpret_cast</span>&lt;<span class="type">void</span>*&gt;(rawAddress);</span><br><span class="line">    <span class="built_in">freeUnaligned</span>(pRawMem);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614210747-2026-06-14.png" fancybox="true"></div></div>
+<h4 id="225-单帧和双缓冲内存分配器"><a class="markdownIt-Anchor" href="#225-单帧和双缓冲内存分配器"></a> 2.2.5 单帧和双缓冲内存分配器</h4>
+<p>这一类内存分配器用于在游戏循环中分配一些临时数据，可以在循环迭代结束以后被丢弃，也可以在下一迭代结束时被丢弃。</p>
+<h5 id="2251-单帧分配器"><a class="markdownIt-Anchor" href="#2251-单帧分配器"></a> 2.2.5.1 单帧分配器</h5>
+<ol>
+<li>实现：预留一块内存，在每帧开始时，堆栈的顶端指针重置到内存块的底端地址，在该帧中，分配要求在堆栈不断成长，循环往复。</li>
+<li>优点是分配的内存永远不手动释放，在每帧开始会清除所有内存，所以及其高效。缺点是程序员不能把指向单帧内存块的指针跨帧使用。</li>
+<li>代码示例实现</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">StackAllocator g_singleFrameAllocator;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主游戏循环</span></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 每帧清除单帧分配器的缓冲区</span></span><br><span class="line">    g_singleFrameAllocator.<span class="built_in">clear</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从单帧分配器分配内存</span></span><br><span class="line">    <span class="comment">// 我们永不需要手动释放这些内存！但要确保这些内存仅在本帧中使用</span></span><br><span class="line">    <span class="type">void</span>* p = g_singleFrameAllocator.<span class="built_in">alloc</span>(nBytes);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="2252-双缓冲分配器"><a class="markdownIt-Anchor" href="#2252-双缓冲分配器"></a> 2.2.5.2 双缓冲分配器</h5>
+<ol>
+<li>双缓冲分配器允许在第i帧分配的内存块用于第i+1帧。实现方法是建立两个相同尺寸的单帧堆栈分配器，在每帧交替使用。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DoubleBufferedAllocator</span></span><br><span class="line">&#123;</span><br><span class="line">    U32 m_curStack;</span><br><span class="line">    StackAllocator m_stack[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">swapBuffers</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        m_curStack = (U32)(!m_curStack);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">clearCurrentBuffer</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        m_stack[m_curStack].<span class="built_in">clear</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="title">alloc</span><span class="params">(<span class="type">size_t</span> mBytes)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> m_stack[m_curStack].<span class="built_in">alloc</span>(mBytes);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">DoubleBufferedAllocator g_doubleBufferedAllocator;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主游戏循环</span></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 和之前一样，每帧清除单帧分配器的缓冲区</span></span><br><span class="line">    g_singleFrameAllocator.<span class="built_in">clear</span>();</span><br><span class="line">    <span class="comment">// 交换缓冲区</span></span><br><span class="line">    g_doubleBufferedAllocator.<span class="built_in">swapBuffers</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 清除当前缓冲区</span></span><br><span class="line">    g_doubleBufferedAllocator.<span class="built_in">clearCurrentBuffer</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从双缓冲分配器分配内存</span></span><br><span class="line">    <span class="type">void</span>* p = g_doubleBufferedAllocator.<span class="built_in">alloc</span>(nBytes);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="23-内存碎片"><a class="markdownIt-Anchor" href="#23-内存碎片"></a> 2.3 内存碎片</h3>
+<h4 id="231-用堆栈和池分配器避免内存碎片"><a class="markdownIt-Anchor" href="#231-用堆栈和池分配器避免内存碎片"></a> 2.3.1 用堆栈和池分配器避免内存碎片</h4>
+<ul>
+<li>堆栈分配器：由于内存块以相反的次序被释放，所以不会产生碎片。</li>
+<li>池分配器：池所有的内存块大小都是一样的。不会因缺乏足够大的块而分配失败。</li>
+</ul>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614214034-2026-06-14.png" fancybox="true"></div></div>
+<h4 id="232-碎片整理和重定位"><a class="markdownIt-Anchor" href="#232-碎片整理和重定位"></a> 2.3.2 碎片整理和重定位</h4>
+<ul>
+<li>碎片整理，类似下图。</li>
+</ul>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614214232-2026-06-14.png" fancybox="true"></div></div>
+<ul>
+<li><strong>问题1</strong>：如果移动了已分配的内存，那么当有指针指向这些内存块也意味着这些指针会失效。</li>
+</ul>
+<blockquote>
+<ol>
+<li><strong>方案1</strong>：为解决碎片整理指针失效的问题，可以指针重定位，把指向这些内存块的指针逐一更新，使移动内存块后的指针指向新的内存块。但程序员需要手动维护正确才行。</li>
+<li><strong>方案2</strong>：另一种方法是舍弃指针，重定位使用智能指针或句柄：</li>
+</ol>
+<ul>
+<li>智能指针：把所有智能指针添加自己到一个全局链表里，移动某块内存，扫描全局链表，更新指向这块内存的智能指针。</li>
+<li>句柄：实现为索引，索引指向句柄表的元素，每个元素存储指针，移动内存，扫描句柄表，修改相应的指针，句柄只是索引，所以移动内存块，句柄值是不变的。</li>
+</ul>
+</blockquote>
+<ul>
+<li><strong>问题2</strong>：某些内存块可能无法重定位，比如第三方库的指针。</li>
+</ul>
+<blockquote>
+<ol>
+<li><strong>方案1</strong>：第三方库在另一个特别缓冲区里分配内存，此缓冲区位于可重定位内存范围之外。</li>
+<li><strong>方案2</strong>：允许一些内存块不能被重定位，如果内存块数量少并且体积少，那么可以接受。</li>
+</ol>
+</blockquote>
+<ul>
+<li><strong>问题3</strong>：碎片整理要复制内存块，操作过程可能很慢。</li>
+</ul>
+<blockquote>
+<ol>
+<li><strong>方案1</strong>：分帧整理，限制每帧最多进行N次内存块移动。</li>
+</ol>
+</blockquote>
+<h2 id="3-容器"><a class="markdownIt-Anchor" href="#3-容器"></a> 3. 容器</h2>
+<p>常见容器包括数组、动态数组、链表、堆栈、队列、双端队列、优先队列、树、二叉搜索树、字典、集合、图、有向无环图。</p>
+<h3 id="31-容器操作"><a class="markdownIt-Anchor" href="#31-容器操作"></a> 3.1 容器操作</h3>
+<p>常见容器操作包括插入、删除、查找、迭代、随机访问等。</p>
+<h3 id="32-迭代器"><a class="markdownIt-Anchor" href="#32-迭代器"></a> 3.2 迭代器</h3>
+<p>迭代器通常设计为容器的友元，简化了迭代过程。后置递增<code>p++</code>和前置递增<code>++p</code>，后置递增必须先递增才能使用值，这会产生数据依赖，引起流水线停顿stall，而使用<code>p++</code>则可立即使用变量的值，递增运算可以稍后进行或者并行执行，不会造成停顿。</p>
+<h3 id="33-算法复杂度"><a class="markdownIt-Anchor" href="#33-算法复杂度"></a> 3.3 算法复杂度</h3>
+<p>需要随机访问使用数组，需要插入或移除元素速度快使用链表。注意链表相比数组还会额外有内存开销（存储了<code>next</code>指针。</p>
+<h3 id="34-自定义容器"><a class="markdownIt-Anchor" href="#34-自定义容器"></a> 3.4 自定义容器</h3>
+<p>容器可以自己实现也可以使用第三方的实现，如果下面第三方的实现不够好，那么可以自己实现。</p>
+<ol>
+<li>STL</li>
+</ol>
+<ul>
+<li>代码的重量级STL类会造成瓶颈，避免使用STL，例如三维网络中的每个顶点加一个<code>std::list</code>不好，<code>std::list</code>会为每个元素动态分配细小的节点对象，会形成很多细小的内存碎片。</li>
+<li>需要支持跨平台，推荐使用<a target="_blank" rel="noopener" href="https://www.stlport.org/">STLPort</a>，比原来的STL高效，功能丰富。</li>
+</ul>
+<ol start="2">
+<li>Boost</li>
+</ol>
+<ul>
+<li>Boost扩展了STL，提供了许多有用的功能。</li>
+<li>Boost文档写得好，会深入探讨开发该库的设计决定，可以用来学习软件设计原则。</li>
+<li>Boost都是模版，只要包含头文件，但会生成大的lib文件，可能不适合小型的游戏项目。</li>
+<li>Boost如果遇到bug需要自己修。而且不支持向后兼容。</li>
+<li>Boost使用需要小心阅读许可证内容。</li>
+</ul>
+<ol start="3">
+<li>Loki</li>
+</ol>
+<ul>
+<li>代码值得学习。</li>
+<li>代码令人生畏，难以使用和全面理解。</li>
+<li>移植不友好，但可以参考里面的基于原则的设计，可以参考一下书《C<ins>设计新思维》(Modern C</ins> Design)。</li>
+</ul>
+<h3 id="35-一些容器实现"><a class="markdownIt-Anchor" href="#35-一些容器实现"></a> 3.5 一些容器实现</h3>
+<h4 id="351-数组"><a class="markdownIt-Anchor" href="#351-数组"></a> 3.5.1 数组</h4>
+<p>STL的数组索内存可以使用<code>swap</code>函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;<span class="type">int</span>&gt; v = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>&#125;;</span><br><span class="line">v.<span class="built_in">reserve</span>(<span class="number">100</span>); <span class="comment">// 预分配了100个元素的容量</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 清空元素，此时 size=0，但 capacity 仍为100</span></span><br><span class="line">v.<span class="built_in">clear</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 核心操作：和一个空的临时 vector 交换</span></span><br><span class="line">std::<span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;().<span class="built_in">swap</span>(v);</span><br></pre></td></tr></table></figure>
+<h4 id="352-链表"><a class="markdownIt-Anchor" href="#352-链表"></a> 3.5.2 链表</h4>
+<ol>
+<li>外嵌式链表，优点是一个元素能置于多个链表中，只要给每个链表单独创建一个指向它的 Link 节点就行。缺点是每次插入都要动态分配 Link 节点。如果希望在链表存储一些实例，这些实例来自第三方库，又不想修改库代码，外露式表会成为唯一选择。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">typename</span> ELEMENT &gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Link</span></span><br><span class="line">&#123;</span><br><span class="line">    Link&lt;ELEMENT&gt;* m_pPrev;</span><br><span class="line">    Link&lt;ELEMENT&gt;* m_pNext;</span><br><span class="line">    ELEMENT*       m_pElem;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>侵入式链表，优点是无需再动态分配节点，每次分配元素已经免费获得节点。缺点是每个元素不能同时置于多个链表中</li>
+</ol>
+<ul>
+<li>实现1：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SomeElement</span></span><br><span class="line">&#123;</span><br><span class="line">    Link&lt;SomeElement&gt; m_link;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他成员</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>实现2：使用继承，可以把节点指针(<code>Link&lt;SomeElement&gt;*</code>)向下转型为指向元素本身的指针(<code>SomeElement*</code>)，消去节点中指向元素的指针。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">typename</span> ELEMENT &gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Link</span></span><br><span class="line">&#123;</span><br><span class="line">    Link&lt;ELEMENT&gt;* m_pPrev;</span><br><span class="line">    Link&lt;ELEMENT&gt;* m_pNext;</span><br><span class="line">    <span class="comment">// 由于继承的关系, 无须 ELEMENT* 指针</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SomeElement</span> : <span class="keyword">public</span> Link&lt;SomeElement&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 其他成员</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>头尾指针：循环链表</li>
+<li>单向链表</li>
+</ul>
+<h4 id="353-字典和散列表"><a class="markdownIt-Anchor" href="#353-字典和散列表"></a> 3.5.3 字典和散列表</h4>
+<ol>
+<li>哈希碰撞</li>
+</ol>
+<ul>
+<li>开放式散列：键值对以链表存储。每次加入键值对需要动态分配内存。</li>
+</ul>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614232910-2026-06-14.png" fancybox="true"></div></div>
+<ul>
+<li>闭合式散列：探查直到找到空位，但是实现困难，必须设定表的键值对数目上限，优点是内存固定，不用动态分配内存。简单的探查法有线性探查、二次探查。建议把散列表设为质数大小，原因可以查看<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/1145217/why-should-hash-functions-use-a-prime-number-modulus">帖子</a>。</li>
+</ul>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260614232953-2026-06-14.png" fancybox="true"></div></div>
+<ol start="2">
+<li>散列把任意数据类型转换为整数，然后整数模表的大小得到表的索引，数学表达这两个过程为：</li>
+</ol>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>h</mi><mo>=</mo><mi>H</mi><mo stretchy="false">(</mo><mi>k</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mi>i</mi><mo>=</mo><mi>h</mi><mtext> </mtext><mtext> </mtext><mi>m</mi><mi>o</mi><mi>d</mi><mtext> </mtext><mtext> </mtext><mi>N</mi></mrow><annotation encoding="application/x-tex">h=H(k), i=h\,\, mod\,\, N
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal">h</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal">h</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">m</span><span class="mord mathnormal">o</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span></span></p>
+<p>常见的字符串散列函数：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://burtleburtle.net/bob/c/lookup3.c">LOOKUP3</a></li>
+<li>循环冗余检验，如<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check">CRC32</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/MD5">MD5</a>，结果好，但是运算成果高</li>
+<li><a target="_blank" rel="noopener" href="https://www.azillionmonkeys.com/qed/hash.html">Paul Hsieh的文章</a>，介绍了一些散列函数的实现。</li>
+</ul>
+<h2 id="4-字符串"><a class="markdownIt-Anchor" href="#4-字符串"></a> 4. 字符串</h2>
+<h3 id="41-字符串的使用问题"><a class="markdownIt-Anchor" href="#41-字符串的使用问题"></a> 4.1 字符串的使用问题</h3>
+<ul>
+<li>字符串要考虑本地化</li>
+</ul>
+<h3 id="42-字符串类"><a class="markdownIt-Anchor" href="#42-字符串类"></a> 4.2 字符串类</h3>
+<ul>
+<li>
+<p>使用字符串类，要明确开销：是否把所有字符缓冲区当做刻度的，是否使用了写时复制，有没有提供移动构造函数。建议以引用形式传递对象，不要用值传递。</p>
+</li>
+<li>
+<p>文件路径建议用类封装，因为不同操作系统的斜线不同。</p>
+</li>
+</ul>
+<h3 id="43-唯一标识符"><a class="markdownIt-Anchor" href="#43-唯一标识符"></a> 4.3 唯一标识符</h3>
+<p>GUID：一般用64位或128位全局唯一标识符，比较不用<code>strcmp</code>，下面是一些方案：</p>
+<ol>
+<li>字符串哈希，把字符串映射到唯一整数，然后整数比较。</li>
+</ol>
+<h3 id="44-本地化"><a class="markdownIt-Anchor" href="#44-本地化"></a> 4.4 本地化</h3>
+<p>介绍了不同编码，如Unicode(UTF-32, UTF-16, UTF-8)。<code>char</code>和<code>wchar_t</code>(大小因为编码可能有歧义)。</p>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260615000042-2026-06-15.png" fancybox="true"></div></div>
+<h2 id="5-引擎配置"><a class="markdownIt-Anchor" href="#5-引擎配置"></a> 5. 引擎配置</h2>
+<h3 id="51-读写选项"><a class="markdownIt-Anchor" href="#51-读写选项"></a> 5.1 读/写选项</h3>
+<ul>
+<li>文本配置文件，如ini，键值对分组</li>
+</ul>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Graphics]</span></span><br><span class="line"><span class="attr">Resolution</span>=<span class="number">1920</span>x1080</span><br><span class="line"><span class="attr">Fullscreen</span>=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>压缩的二进制文件，数据紧凑。</li>
+<li>Windows注册表：树形结构。</li>
+<li>命令行选项</li>
+<li>环境变量</li>
+<li>线上用户设定文档</li>
+</ul>
+<h3 id="52-个别用户选项"><a class="markdownIt-Anchor" href="#52-个别用户选项"></a> 5.2 个别用户选项</h3>
+<p><code>HKEY_CURRENT_USER</code>是当前用户子树的别名，用户有其单独的注册表子树<code>HKEY_USERS</code>，读写<code>HKEY_CURRENT_USER</code>下的注册表项，就可以管理用户的配置选项。</p>
+<h3 id="53-引擎配置管理"><a class="markdownIt-Anchor" href="#53-引擎配置管理"></a> 5.3 引擎配置管理</h3>
+<p>可以关注一下Scheme数据定义，可以自动生成<code>C/C++</code>头文件，然后调用<code>LookupSymbol()</code>函数即可读取数据。</p>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/05/16/%E3%80%8A%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E3%80%8B%E7%AC%94%E8%AE%B04%EF%BC%9A%E6%B8%B8%E6%88%8F%E6%89%80%E9%9C%80%E7%9A%84%E4%B8%89%E7%BB%B4%E6%95%B0%E5%AD%A6/">《游戏引擎架构》笔记4：游戏所需的三维数学</a></div></section></div>
+
+
+
+
+
+
+  <div class='related-wrap md-text reveal' id="comments">
+    <section class='header cmt-title cap theme'>
+      快来参与讨论吧
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="sitemap"><div class="sitemap-group"><span class="fs14">博客</span><a href="/">近期</a><a href="/">分类</a><a href="/">标签</a><a href="/">归档</a></div><div class="sitemap-group"><span class="fs14">项目</span><a href="/">开源库</a></div><div class="sitemap-group"><span class="fs14">社交</span><a href="/">友链</a><a href="/">留言板</a></div><div class="sitemap-group"><span class="fs14">更多</span><a href="/">关于本站</a><a href="/">GitHub</a></div></div><div class="text"><p>本站由 <a href="/">@小林up</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar">Stellar</a> 主题创建。<br />
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+<div><span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>，<span id="busuanzi_container_site_pv">总访问量: <span id="busuanzi_value_site_pv"></span>次</span>，<span id="busuanzi_container_site_uv">访客数: <span id="busuanzi_value_site_uv"></span>人</span></div></div></footer>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+  function createtime() {
+    var now = new Date();
+    var grt= new Date("03/25/2023 18:40:00");
+    now.setTime(now.getTime()+250);
+    days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+    hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+    if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+    mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+    seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+    snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+    document.getElementById("timeDate").innerHTML = "本站已运行 "+dnum+" 天 ";
+    document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  };
+  setInterval("createtime()",250);
+</script>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  const stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = stellar.config.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.version = '1.18.5';
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.18.5';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+    root : '/',
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://gcore.jsdelivr.net/npm/jquery@3.6.2/dist/jquery.min.js'
+  };
+
+  if ('local_search') {
+    stellar.search = {};
+    stellar.search.service = 'local_search';
+    if (stellar.search.service == 'local_search') {
+      let service_obj = Object.assign({}, {"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"});
+      stellar.search[stellar.search.service] = service_obj;
+    }
+  }
+
+  // stellar js
+  stellar.plugins.stellar = Object.assign({"sites":"/js/plugins/sites.js","friends":"/js/plugins/friends.js","ghinfo":"/js/plugins/ghinfo.js","timeline":"/js/plugins/timeline.js","linkcard":"/js/plugins/linkcard.js","fcircle":"/js/plugins/fcircle.js","weibo":"/js/plugins/weibo.js"});
+
+  stellar.plugins.marked = Object.assign("https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js");
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://gcore.jsdelivr.net/npm/vanilla-lazyload@17.8.3/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@8.4.5/swiper-bundle.min.css","js":"https://unpkg.com/swiper@8.4.5/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://gcore.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://gcore.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://gcore.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://gcore.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://gcore.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti@0.9.2/umd/heti.min.css","js":"https://unpkg.com/heti@0.9.2/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        stellar.loadScript('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://celebrated-quokka-268a6f.netlify.app/.netlify/functions/twikoo"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<!-- inject -->
+
+
+  </div>
+</body>
+</html>
