@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 6.3.0">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.18.5">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://gcore.jsdelivr.net'>
+  <link rel="preconnect" href="https://gcore.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  
+  <title>《游戏引擎架构》笔记6：资源及文件系统 - 小林up</title>
+
+  
+    <meta name="description" content="1. 文件系统  1.1 文件名和路径  Unix路径分隔符是 &#x2F;，Windows路径分隔符是 \。 路径分离目录&#x2F;文件名&#x2F;扩展名，路径规范化，在绝对路径和相对路径之间切换，WIndows提供了API，由shlwapi.dll库提供，提供shlwapi.h头文件，但只用于Win32平台。为了跨平台游戏引擎通常实现自己轻量化的路径处理API。   1.2 基本文件I&#x2F;O  C程序库提供IO输入输出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《游戏引擎架构》笔记6：资源及文件系统">
+<meta property="og:url" content="https://yuanzidan081.github.io/2026/06/17/%E3%80%8A%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E3%80%8B%E7%AC%94%E8%AE%B06%EF%BC%9A%E8%B5%84%E6%BA%90%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="小林up">
+<meta property="og:description" content="1. 文件系统  1.1 文件名和路径  Unix路径分隔符是 &#x2F;，Windows路径分隔符是 \。 路径分离目录&#x2F;文件名&#x2F;扩展名，路径规范化，在绝对路径和相对路径之间切换，WIndows提供了API，由shlwapi.dll库提供，提供shlwapi.h头文件，但只用于Win32平台。为了跨平台游戏引擎通常实现自己轻量化的路径处理API。   1.2 基本文件I&#x2F;O  C程序库提供IO输入输出">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260619143520-2026-06-19.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260620224622-2026-06-20.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260620231624-2026-06-20.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260623225005-2026-06-23.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260623225029-2026-06-23.png">
+<meta property="og:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260623231949-2026-06-23.png">
+<meta property="article:published_time" content="2026-06-17T00:56:37.000Z">
+<meta property="article:modified_time" content="2026-06-23T15:22:05.685Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="游戏引擎">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260619143520-2026-06-19.png">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/redcell.ico">
+  
+
+  
+
+  
+
+
+  
+    
+      <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+    
+  
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+  
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic4.zhimg.com/80/v2-9d90fcab1f5ce9a676ccc0d2b7727684.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">小林up</div><div class="sub normal cap">一个长期主义者</div><div class="sub hover cap" style="opacity:0"> 十年饮冰，冷暖自知</div></a></div>
+
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/wiki/">项目</a><a class="nav-item" href="/notes/">笔记</a><a class="nav-item" href="/friends/">社交</a></nav>
+</header>
+
+
+<div class="widgets">
+
+<widget class="widget-wrapper toc single" id="data-toc"><div class="widget-header cap dis-select"><span class="name">《游戏引擎架构》笔记6：资源及文件系统</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-text"> 1. 文件系统</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E6%96%87%E4%BB%B6%E5%90%8D%E5%92%8C%E8%B7%AF%E5%BE%84"><span class="toc-text"> 1.1 文件名和路径</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-%E5%9F%BA%E6%9C%AC%E6%96%87%E4%BB%B6io"><span class="toc-text"> 1.2 基本文件I&#x2F;O</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-%E6%96%87%E4%BB%B6io%E6%A8%A1%E5%BC%8F"><span class="toc-text"> 1.3 文件I&#x2F;O模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E5%99%A8"><span class="toc-text"> 2. 资源管理器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E7%A6%BB%E7%BA%BF%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E5%8F%8A%E5%85%B6%E5%B7%A5%E5%85%B7%E9%93%BE"><span class="toc-text"> 2.1 离线资源管理及其工具链</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E8%BF%90%E8%A1%8C%E6%97%B6%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86"><span class="toc-text"> 2.2 运行时资源管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#221-%E8%BF%90%E8%A1%8C%E6%97%B6%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E5%99%A8%E7%9A%84%E8%B4%A3%E4%BB%BB"><span class="toc-text"> 2.2.1 运行时资源管理器的责任</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#222-%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6%E5%8F%8A%E7%9B%AE%E5%BD%95%E7%BB%84%E7%BB%87"><span class="toc-text"> 2.2.2 资源文件及目录组织</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#223-%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="toc-text"> 2.2.3 资源文件格式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#224-%E8%B5%84%E6%BA%90%E5%85%A8%E5%B1%80%E7%BB%9F%E4%B8%80%E6%A0%87%E8%AF%86%E7%AC%A6"><span class="toc-text"> 2.2.4 资源全局统一标识符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#225-%E8%B5%84%E6%BA%90%E6%B3%A8%E5%86%8C%E8%A1%A8"><span class="toc-text"> 2.2.5 资源注册表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#226-%E8%B5%84%E6%BA%90%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text"> 2.2.6 资源的生命周期</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#27-%E8%B5%84%E6%BA%90%E6%89%80%E9%9C%80%E7%9A%84%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-text"> 2.7 资源所需的内存管理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#28-%E5%A4%8D%E5%90%88%E8%B5%84%E6%BA%90%E5%8F%8A%E5%BC%95%E7%94%A8%E5%AE%8C%E6%95%B4%E6%80%A7"><span class="toc-text"> 2.8 复合资源及引用完整性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#29-%E5%A4%84%E7%90%86%E8%B5%84%E6%BA%90%E9%97%B4%E7%9A%84%E4%BA%A4%E5%8F%89%E5%BC%95%E7%94%A8"><span class="toc-text"> 2.9 处理资源间的交叉引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#210-%E8%BD%BD%E5%85%A5%E5%90%8E%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text"> 2.10 载入后初始化</span></a></li></ol></li></ol></li></ol></div></div></widget>
+
+<widget class="widget-wrapper search"><div class="widget-body"><div class="search-wrapper" id="search"><form class="search-form"><input type="text" class="search-input" id="search-input" placeholder="文章搜索"><svg t="1670596976048" class="icon search-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2676" width="200" height="200"><path d="M938.2 832.6L723.8 618.1c-2.5-2.5-5.3-4.4-7.9-6.4 36.2-55.6 57.3-121.8 57.3-193.1C773.3 222.8 614.6 64 418.7 64S64 222.8 64 418.6c0 195.9 158.8 354.6 354.6 354.6 71.3 0 137.5-21.2 193.2-57.4 2 2.7 3.9 5.4 6.3 7.8L832.5 938c14.6 14.6 33.7 21.9 52.8 21.9 19.1 0 38.2-7.3 52.8-21.8 29.2-29.1 29.2-76.4 0.1-105.5M418.7 661.3C284.9 661.3 176 552.4 176 418.6 176 284.9 284.9 176 418.7 176c133.8 0 242.6 108.9 242.6 242.7 0 133.7-108.9 242.6-242.6 242.6" p-id="2677"></path></svg></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div></div></widget>
+
+
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/Yuanzidan081" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/social/08a41b181ce68.svg"/></a><a class="social" href="https://blog.csdn.net/subtitle_?spm=1000.2115.3001.5343" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/Yuanzidan081/picx-images-hosting/master/20240101/csdn.6umiks9rxx80.svg"/></a><a class="social" href="https://www.zhihu.com/people/tian-xin-63-17" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://raw.githubusercontent.com/Yuanzidan081/picx-images-hosting/master/20240101/zhihu.s485uwaltjk.svg"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-06-17T00:56:37.000Z">2026-06-17</time></div></div>
+
+<article class='md-text content post'>
+<h1 class="article-title"><span>《游戏引擎架构》笔记6：资源及文件系统</span></h1>
+<h2 id="1-文件系统"><a class="markdownIt-Anchor" href="#1-文件系统"></a> 1. 文件系统</h2>
+<h3 id="11-文件名和路径"><a class="markdownIt-Anchor" href="#11-文件名和路径"></a> 1.1 文件名和路径</h3>
+<ol>
+<li>Unix路径分隔符是 <code>/</code>，Windows路径分隔符是 <code>\</code>。</li>
+<li>路径分离目录/文件名/扩展名，路径规范化，在绝对路径和相对路径之间切换，WIndows提供了API，由<code>shlwapi.dll</code>库提供，提供<code>shlwapi.h</code>头文件，但只用于Win32平台。为了跨平台游戏引擎通常实现自己轻量化的路径处理API。</li>
+</ol>
+<h3 id="12-基本文件io"><a class="markdownIt-Anchor" href="#12-基本文件io"></a> 1.2 基本文件I/O</h3>
+<ol>
+<li>C程序库提供IO输入输出API，每次调用都需要缓冲区的数据区块，供程序和磁盘之间传送来源或目的字节，分为有缓冲功能的I/O API（API负责管理所需的输入/输出数据缓冲）和无缓冲功能的I/O API（程序员负责管理数据缓冲）。</li>
+</ol>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260619143520-2026-06-19.png" fancybox="true"></div></div>
+<blockquote>
+<p><strong>Q: 为什么需要自己管理缓冲区？</strong><br>
+A: 比如往日志写数据会降低性能，所以可以先把数据积累到内存缓冲，漫溢后写进硬盘，之后把缓冲输出函数放到另一个线程里，避免游戏循环发生流水线停顿。</p>
+</blockquote>
+<ol start="2">
+<li>包装I/O API好处：跨平台兼容，简化API，延伸功能。</li>
+</ol>
+<h3 id="13-文件io模式"><a class="markdownIt-Anchor" href="#13-文件io模式"></a> 1.3 文件I/O模式</h3>
+<ol>
+<li>同步文件I/O：程序发出I/O请求，等待I/O完成，返回结果程序再继续运行。</li>
+<li>异步文件I/O：为了支持streaming，需要异步文件I/O，程序发出I/O请求，I/O操作在后台进行，程序继续运行。</li>
+</ol>
+<ul>
+<li>优先权：异步I/O操作有不同的优先权，会根据优先权进行处理。</li>
+<li>工作原理：异步文件I/O利用另一单独线程处理I/O请求，主线程调用异步函数以后，会把请求放入一个队列，并立即返回，之后I/O线程从队列取出请求，以阻塞I/O函数处理请求，处理完成后，调用主线程之前提供的回调函数，告之操作已经完成，若主线程选择等待I/O请求，就会使用信号量处理。（每个请求对应一个信号量，主线程把自身处于休眠状态，等待I/O线程在完成请求工作后通知信号量）</li>
+</ul>
+<h2 id="2-资源管理器"><a class="markdownIt-Anchor" href="#2-资源管理器"></a> 2. 资源管理器</h2>
+<h3 id="21-离线资源管理及其工具链"><a class="markdownIt-Anchor" href="#21-离线资源管理及其工具链"></a> 2.1 离线资源管理及其工具链</h3>
+<ol>
+<li>资源数据库：资源经过ACP（Asset Conditioning Pipeline）处理，需要用一些元数据描述如何对资源进行处理，资源数据库需要提供的功能包括：</li>
+</ol>
+<ul>
+<li>处理多种类型的资源，理想地以一致的方式处理。</li>
+<li>创建新资源。</li>
+<li>删除资源。</li>
+<li>查看和修改现存的资源。</li>
+<li>资源从一个位置移到磁盘的另一位置。</li>
+<li>让资源交叉引用其他资源（网格引用材质，关卡引用一组动画），交叉引用同时驱动资源管理生成过程及其运行时的载入过程。</li>
+<li>维持数据库内所有交叉引用的引用完整性，执行删除或移动资源等常见操作后，仍能保持引用完整性。</li>
+<li>保存版本历史，记录资源的修改历史，方便回滚。</li>
+<li>支持不同形式的搜索和查询。</li>
+</ul>
+<ol start="2">
+<li>一些游戏引擎的资源管理器设计：</li>
+</ol>
+<ul>
+<li>UE4：UnrealEd管理资源元数据、资产创建、关卡布局。一站式存取引擎支持的一切资源。资源存于少量的大型二进制包文件，不好做版本合并，一个方式是分包，另外引用完整性可能也有一些问题：资源移动或重命名会生成虚拟对象，这些虚拟对象可能会闲置累积起来造成问题。</li>
+<li>顽皮狗引擎：MySQL数据库存储，编写GUI封装SQL语言。资源粒度小，不易冲突，仅提供必需的特性，显而易见的文件映射，容易更改DCC数据的导出和处理方式，容易生成资产：命令行加资源名即可生成资产。</li>
+<li>OGRE：提供一致简单的接口可以扩展接入任何类型的资源，缺乏离线数据库，只提供导出器，DCC工具数据接入麻烦。</li>
+</ul>
+<ol start="3">
+<li>ACP（Asset Conditioning Pipeline）</li>
+</ol>
+<ul>
+<li>DCC工具的资产经过3个阶段到达引擎：
+<ul>
+<li>导出器：DCC工具导出中间格式，供ACP后续阶段使用。</li>
+<li>资源编译器：数据改造，比如把Mesh三角形重排为triangle strip，压缩纹理，计算spline每段弧长。</li>
+<li>资源链接器：多个资源结合成单个有用的包，比如多个Mesh文件、多个材质文件、一个骨骼文件、多个动画文件内的数据结合成完整的资源。</li>
+</ul>
+</li>
+<li>资源依赖关系和生成规则：
+<ul>
+<li>根据资源引用关系确定资产改动后需要重新生成那些资产。</li>
+<li>数据格式可以应付版本变动。</li>
+<li>可靠的依赖和生成系统：源文件变动要能触发重新生成资产。</li>
+</ul>
+</li>
+</ul>
+<h3 id="22-运行时资源管理"><a class="markdownIt-Anchor" href="#22-运行时资源管理"></a> 2.2 运行时资源管理</h3>
+<h4 id="221-运行时资源管理器的责任"><a class="markdownIt-Anchor" href="#221-运行时资源管理器的责任"></a> 2.2.1 运行时资源管理器的责任</h4>
+<ol>
+<li>确保任何时候，同一个资源在内存只有一个副本。</li>
+<li>管理每个资源的生命期，载入需要的资源，在不需要的时候卸载。</li>
+<li>处理复合资源（多个资源组成的资源）的导入。</li>
+<li>维护引用完整性：内部引用完整性（单个资源内的交叉引用）和外部引用完整性（资源间的交叉引用），资源的载入要保证所有依赖的子资源也一并载入。</li>
+<li>管理资源载入后的内存用量，确保资源存储在内存中合适的地方。</li>
+<li>允许按资源类型，载入资源后执行自定义的处理（资源登录/资源载入初始化）。</li>
+<li>提供单一统一接口管理多种资源类型，方便扩展处理。</li>
+<li>支持streaming异步资源载入。</li>
+</ol>
+<h4 id="222-资源文件及目录组织"><a class="markdownIt-Anchor" href="#222-资源文件及目录组织"></a> 2.2.2 资源文件及目录组织</h4>
+<ul>
+<li>一些引擎的设计：
+<ul>
+<li>太空逃亡者游戏：资源目录树。</li>
+<li>OGRE：资源文件放在zip存档，好处有：zip是开放格式、可被压缩、可视为模块、内部的虚拟文件也有相对路径。</li>
+<li>UE3：资源放在大型合成文件（package），不允许资源在磁盘用独立文件出现，包文件用自定义格式，可以用UnrealEd编辑。</li>
+</ul>
+</li>
+</ul>
+<h4 id="223-资源文件格式"><a class="markdownIt-Anchor" href="#223-资源文件格式"></a> 2.2.3 资源文件格式</h4>
+<p>游戏引擎会自定义文件格式：</p>
+<ul>
+<li>引擎所需的部分信息可能没有标准格式可以存储；</li>
+<li>脱机处理降低运行时载入和处理资源数据时间需求，脱机时规范数据内存布局如适合硬件读取的二进制格式，而无需运行时实时解算（如解析FBX转换顶点结构）。</li>
+</ul>
+<h4 id="224-资源全局统一标识符"><a class="markdownIt-Anchor" href="#224-资源全局统一标识符"></a> 2.2.4 资源全局统一标识符</h4>
+<p>全局唯一标识符GUID将每个资源映射到硬盘的物理文件，保证游戏里是唯一的。</p>
+<h4 id="225-资源注册表"><a class="markdownIt-Anchor" href="#225-资源注册表"></a> 2.2.5 资源注册表</h4>
+<p>资源注册表保证在任何时间载入内存的每个资源只有一份副本，最简单的实现是一个哈希表，键是资源的GUID，值是指向资源的指针。</p>
+<p>为什么不自动载入资源？不缓存的话载入可能会带来停顿，解决：</p>
+<ol>
+<li>游戏运行时进制加载资源，游戏关卡的所有资源在游戏进行前全部加载（载入动画或载入进度条）。</li>
+<li>资源使用streaming异步载入，玩家在玩关卡A，关卡B的资源在背景加载，但实现困难。</li>
+</ol>
+<h4 id="226-资源的生命周期"><a class="markdownIt-Anchor" href="#226-资源的生命周期"></a> 2.2.6 资源的生命周期</h4>
+<p>资源的生命周期有不同的需求，有的是常驻内存，有的则是在需要的时候载入，不需要的时候卸载。问题是：资源会进行共享，不希望在刚卸载了一些资源以后，在其他地方🈶重新加载相同的资源，解决方案是：</p>
+<ul>
+<li>资源引用记数，加载资源引用记数+1，卸载资源引用记数-1，引用记数为0时，卸载资源。</li>
+</ul>
+<h4 id="27-资源所需的内存管理"><a class="markdownIt-Anchor" href="#27-资源所需的内存管理"></a> 2.7 资源所需的内存管理</h4>
+<p>载入/卸载资源要避免内存碎片，常见的解决方案包括：</p>
+<ol>
+<li>基于堆的资源分配：这种方法直接忽略内存碎片问题，通过通用的堆分配器分配资源所需的内存（C的<code>malloc</code>或C++的全局<code>new</code>运算符），适合运行在个人计算机，因为操作系统支持高级的虚拟内存分配，对于物理内存有限的游戏机内存碎片会是一个问题，于是也可以定期整理内存碎片。</li>
+<li>基于堆栈的资源分配，不会产生内存碎片，因为内存是连续分配的，会以分配的反方向进行释放内存，使用需要满足两个条件：</li>
+</ol>
+<ul>
+<li>游戏是线性及以关卡为中心的。</li>
+<li>内存足够容纳各个完整关卡。</li>
+</ul>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260620224622-2026-06-20.png" fancybox="true"></div></div>
+<p>双端堆栈分配器也可使用这种方法，已有的一些方案有：</p>
+<ul>
+<li>底端堆栈用于载入持久的数据，顶端堆栈用于为每帧临时分配内存（Midway）</li>
+<li>ping-pong载入关卡，将关卡B压缩后的版本载入顶端堆栈，当前关卡A（无压缩版本）则驻于底端堆栈。关卡A进入关卡B，简单释放关卡A的资源（清除底端堆栈），之后把关卡B从顶端堆栈解压到底端堆栈。解压缩通常比硬盘读入数据快得多，这一方法去掉了载入时间，让玩家过关时更感顺畅。</li>
+</ul>
+<ol start="3">
+<li>基于池的资源分配：资源数量以同等大小的组块载入，池的底层实现需要根据需要使用数组或者其他的数据结构（数组不适合大型连续数据结构，使用链表等更优）。池也存在缺点，可能存在空间浪费，组块的大小需要很好地权衡。为了解决组块浪费内存问题，一个方法是建立<strong>资源组块分配器</strong>，具体实现为：</li>
+</ol>
+<ul>
+<li><strong>资源组块分配器原理</strong>：管理一个链表，内涵所有未用满内存的组块，每笔数据包含自由内存块的位置和大小，于是可以从自由内存块按需分配（比如使用通用堆分配器管理自由内存块链表或为每个自由内存块设立小型栈分配器）。</li>
+<li><strong>资源组块分配器问题</strong>：若在资源组块未使用的区域分配内存，释放组块只能选择全部释放或不释放，从那些未用区域分配来的内存会在资源卸载时离奇消失。
+<ul>
+<li><strong>解决方案</strong>：只利用资源组块分配器分配一些和对应生命周期的内存，A组块的自由内存数据属于关卡A的数据分配，B组块的自由内存数据属于关卡B的数据分配，需要资源组块分配器独立管理每个关卡的组块。用户分配要指明要从哪个关卡分配内存才可以让分配器选择正确的链表来满足要求。</li>
+</ul>
+</li>
+<li><strong>资源组块分配器可行性</strong>：大部分游戏引擎在载入资源需要动态分配内存，内存需求可能大于资源文件本身，资源组块分配器可以重新利用组块原来浪费的内存。</li>
+<li><strong>组块资源的另一概念：文件段</strong>：资源文件可能包含多段，以配合上述基于池的资源分配。一段可能有临时数据，仅在载入过程使用，载入整个资源后临时数据就会丢弃，另一段可能包含调试信息，游戏在Debug模式运行载入这些调试数据，在最终发型版本不会载入。</li>
+</ul>
+<h4 id="28-复合资源及引用完整性"><a class="markdownIt-Anchor" href="#28-复合资源及引用完整性"></a> 2.8 复合资源及引用完整性</h4>
+<p>相关概念前面2.1和2.2节有提过。</p>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260620231624-2026-06-20.png" fancybox="true"></div></div>
+<h4 id="29-处理资源间的交叉引用"><a class="markdownIt-Anchor" href="#29-处理资源间的交叉引用"></a> 2.9 处理资源间的交叉引用</h4>
+<p>资源管理的难点在于：管理资源对象间的交叉引用，确保维系引用完整性。</p>
+<p>C++里两个数据对象间的交叉引用用指针或引用实现，指针的地址在多次运行相同程序可能会改变，数据存储到文件里不能用指针来表示对象之间的依赖性。解决方案有：</p>
+<ol>
+<li>
+<p>GUID交叉引用，资源管理器维护一个全局资源查找表，每次资源对象载入内存，把指针以GUID为键加入查找表，当所有资源对象都载入内存，可以扫描所有对象，对其交叉引用的资源对象GUID，通过全局资源查找表换成指针。</p>
+</li>
+<li>
+<p>指针修正表：把指针转换为文件偏移值。把对象序列化为二进制文件。</p>
+</li>
+</ol>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260623225005-2026-06-23.png" fancybox="true"></div></div>
+<p>即使对象在内存里不是连续的，序列化以后在二进制文件里也是连续的，因而可以知道每个对象的映像相对文件开始的偏移值，可以简单写入偏移值（指针总有足够的位存放偏移值）。如果要把文件载入内存，就需要修正指针：把偏移值转换为指针，下面是代码的简单实现，载入内存以后对象依旧是连续的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">U8* <span class="title">ConvertOffsetToPointer</span><span class="params">(U32 objectOffset,</span></span></span><br><span class="line"><span class="params"><span class="function">                           U8* pAddressOfFileImage)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    U8* pObject = pAddressOfFileImage + objectOffset;</span><br><span class="line">    <span class="keyword">return</span> pObject;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260623225029-2026-06-23.png" fancybox="true"></div></div>
+<p>关键的是要找出需要转换的指针，我们可以在序列化的时候把每个对象的指针放到简单列表（指针修正表），然后连这个表一起写入二进制文件，这样就可以凭这个表修正所有指针。指针修正表的内容只是文件里的偏移值，每个偏移值代表一个需要修正的指针。下图右边的二进制文件通过修正表的偏移找到里面的指针，指针对应的对象正和左边的内存图是一样的。</p>
+<div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://lsy-image1.oss-cn-beijing.aliyuncs.com/img/20260623231949-2026-06-23.png" fancybox="true"></div></div>
+<ol>
+<li>存储C<ins>对象为二进制映像：构造函数，载入C</ins>对象需要调用对象的构造函数，有两个常见解决方案：</li>
+</ol>
+<ul>
+<li>让二进制文件只支持PDDS结构（plain old data structure，包括C struct和无虚函数不做事情的平凡构造函数的C++ struct/Class）。</li>
+<li>非PODS对象的偏移值组成一个表，并在表里记录对象属于哪个类，最后把表写入二进制文件，之后载入二进制映像遍历此表，对每个对象使用placement new调用构造函数，代码实现为：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span>* pObject = <span class="built_in">ConvertOffsetToPointer</span>(objectOffset, pAddressOfFileImage);</span><br><span class="line">::<span class="keyword">new</span>(pObject) className;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>处理外部引用：外部交叉引用指明偏移值和GUID，加上资源对象所述文件的路径。关键在于先载入所有互相依赖的文件，可行的做法是：</li>
+</ol>
+<ul>
+<li>载入每个资源文件扫描文件的交叉引用表，并载入所有被外部引用但未载入的资源文件，载入后把其地址加入住查找表，所有互相依赖的资源文件都载入后，再用主查找表转换：从GUID或文件偏移值转换为真实的内存地址（载入了知道了地址才知道转换到哪里去）。</li>
+</ul>
+<h4 id="210-载入后初始化"><a class="markdownIt-Anchor" href="#210-载入后初始化"></a> 2.10 载入后初始化</h4>
+<p>涉及到资源的载入后初始化和拆除，比如Mesh的顶点和索引载入主存渲染前要送到显存。C语言实现用以用查找表，每个资源类型映射一对函数指针分别负载载入后初始化和拆除。C++则可以用多态实现载入后初始化和拆除，比如虚函数<code>Init()</code>和<code>Destroy()</code>。</p>
+<p>载入后初始化可能会增加新数据（样条计算额外空间保存结果），也可能会丢弃旧数据（兼容旧Mesh数据转换为新格式旧数据丢弃）。解决办法比如允许载入两种资源：(1)直接载入最终的内存位置；(2)载入临时的内存区域。载入后初始化在临时内存区域最终需要把处理后的数据复制到最终的内存为止，然后丢弃临时内存的资源数据，这样就不会浪费内存保存旧数据。</p>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2026/05/27/%E3%80%8A%E6%B8%B8%E6%88%8F%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E3%80%8B%E7%AC%94%E8%AE%B05%EF%BC%9A%E6%B8%B8%E6%88%8F%E6%94%AF%E6%8C%81%E7%B3%BB%E7%BB%9F/">《游戏引擎架构》笔记5：游戏支持系统</a></div></section></div>
+
+
+
+
+
+
+  <div class='related-wrap md-text reveal' id="comments">
+    <section class='header cmt-title cap theme'>
+      快来参与讨论吧
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="sitemap"><div class="sitemap-group"><span class="fs14">博客</span><a href="/">近期</a><a href="/">分类</a><a href="/">标签</a><a href="/">归档</a></div><div class="sitemap-group"><span class="fs14">项目</span><a href="/">开源库</a></div><div class="sitemap-group"><span class="fs14">社交</span><a href="/">友链</a><a href="/">留言板</a></div><div class="sitemap-group"><span class="fs14">更多</span><a href="/">关于本站</a><a href="/">GitHub</a></div></div><div class="text"><p>本站由 <a href="/">@小林up</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar">Stellar</a> 主题创建。<br />
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+<div><span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>，<span id="busuanzi_container_site_pv">总访问量: <span id="busuanzi_value_site_pv"></span>次</span>，<span id="busuanzi_container_site_uv">访客数: <span id="busuanzi_value_site_uv"></span>人</span></div></div></footer>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+  function createtime() {
+    var now = new Date();
+    var grt= new Date("03/25/2023 18:40:00");
+    now.setTime(now.getTime()+250);
+    days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+    hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+    if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+    mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+    seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+    snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+    document.getElementById("timeDate").innerHTML = "本站已运行 "+dnum+" 天 ";
+    document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  };
+  setInterval("createtime()",250);
+</script>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  const stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = stellar.config.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.version = '1.18.5';
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.18.5';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+    root : '/',
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://gcore.jsdelivr.net/npm/jquery@3.6.2/dist/jquery.min.js'
+  };
+
+  if ('local_search') {
+    stellar.search = {};
+    stellar.search.service = 'local_search';
+    if (stellar.search.service == 'local_search') {
+      let service_obj = Object.assign({}, {"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"});
+      stellar.search[stellar.search.service] = service_obj;
+    }
+  }
+
+  // stellar js
+  stellar.plugins.stellar = Object.assign({"sites":"/js/plugins/sites.js","friends":"/js/plugins/friends.js","ghinfo":"/js/plugins/ghinfo.js","timeline":"/js/plugins/timeline.js","linkcard":"/js/plugins/linkcard.js","fcircle":"/js/plugins/fcircle.js","weibo":"/js/plugins/weibo.js"});
+
+  stellar.plugins.marked = Object.assign("https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js");
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://gcore.jsdelivr.net/npm/vanilla-lazyload@17.8.3/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@8.4.5/swiper-bundle.min.css","js":"https://unpkg.com/swiper@8.4.5/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://gcore.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://gcore.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://gcore.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://gcore.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://gcore.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti@0.9.2/umd/heti.min.css","js":"https://unpkg.com/heti@0.9.2/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        stellar.loadScript('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://celebrated-quokka-268a6f.netlify.app/.netlify/functions/twikoo"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<!-- inject -->
+
+
+  </div>
+</body>
+</html>
